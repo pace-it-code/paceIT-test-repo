@@ -3,141 +3,65 @@ import { db } from '../../../../utils/firebase';
 import { collection, addDoc, getDocs,getDoc, query, where, deleteDoc, doc, updateDoc } from 'firebase/firestore';
 import { CartItem, Product } from '../../../../types/types';
 import { stat } from 'fs';
-
-export async function POST(request: Request) {
+export async function POST(req: NextRequest) {
   try {
-    const body = await request.json();
+    const body = await req.json();
     const { userId, productId, quantity } = body;
 
     if (!userId || !productId || !quantity) {
-      return NextResponse.json({
-        success: false,
-        error: 'Please provide all required fields'
-      }, { status: 400 });
+      return NextResponse.json({ success: false, error: "Missing required fields" }, { status: 400 });
     }
 
-    const productRef = doc(db, "products", productId);
-    const productSnap = await getDoc(productRef);
-    if(!productSnap.exists()){
-        return NextResponse.json({
-            msg:"Internal Error"
-        })
+    const userRef = doc(db, "users", userId);
+    const userSnap = await getDoc(userRef);
+
+    if (!userSnap.exists()) {
+      return NextResponse.json({ success: false, error: "User not found" }, { status: 404 });
     }
-    const {price} = productSnap.data() as Product ;
 
+    const userData = userSnap.data();
+    let cart = userData.cart || [];
 
-    const cartItem: CartItem = {
-      productId,
-      quantity: Number(quantity),
-      price
-    };
+    const existingItemIndex = cart.findIndex((item: CartItem) => item.productId === productId);
 
-    const docRef = await addDoc(collection(db, "carts"), {
-      userId,
-      ...cartItem,
-      createdAt: new Date().toISOString()
-    });
+    if (existingItemIndex !== -1) {
+      cart[existingItemIndex].quantity += quantity;
+    } else {
+      cart.push({
+        productId,
+        quantity,
+        addedAt: new Date().toISOString(),
+      });
+    }
 
-    return NextResponse.json({
-      success: true,
-      data: {
-        id: docRef.id,
-        ...cartItem
-      }
-    }, { status: 201 });
+    await updateDoc(userRef, { cart });
+
+    return NextResponse.json({ success: true, cart }, { status: 200 });
   } catch (error) {
-    console.error('Error adding to cart:', error);
-    return NextResponse.json({
-      success: false,
-      error: 'Error adding to cart'
-    }, { status: 500 });
+    console.error("Error updating cart:", error);
+    return NextResponse.json({ success: false, error: "Error updating cart" }, { status: 500 });
   }
 }
-
-export async function GET(request: Request) {
+export async function GET(req: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url);
-    const userId = searchParams.get('userId');
+    const { searchParams } = new URL(req.url);
+    const userId = searchParams.get("userId");
 
     if (!userId) {
-      return NextResponse.json({
-        success: false,
-        error: 'User ID is required'
-      }, { status: 400 });
+      return NextResponse.json({ success: false, error: "User ID is required" }, { status: 400 });
     }
 
-    const cartQuery = query(collection(db, "carts"), where("userId", "==", userId));
-    const cartDocs = await getDocs(cartQuery);
-    const cartItems = cartDocs.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    }));
+    const userRef = doc(db, "users", userId);
+    const userSnap = await getDoc(userRef);
 
-    return NextResponse.json({
-      success: true,
-      data: cartItems
-    });
+    if (!userSnap.exists()) {
+      return NextResponse.json({ success: false, error: "User not found" }, { status: 404 });
+    }
+
+    const userData = userSnap.data();
+    return NextResponse.json({ success: true, cart: userData.cart || [] }, { status: 200 });
   } catch (error) {
-    console.error('Error getting cart items:', error);
-    return NextResponse.json({
-      success: false,
-      error: 'Error getting cart items'
-    }, { status: 500 });
+    console.error("Error fetching cart:", error);
+    return NextResponse.json({ success: false, error: "Error fetching cart" }, { status: 500 });
   }
-}
-
-export async function PUT(req:NextRequest) {
-    try{
-        const body = await req.json();
-        const {id,newQuantity} = body;
-
-        const cartQuery = doc(db, "carts", id);
-        const cartDocsSnap = await getDoc(cartQuery);
-        if(!cartDocsSnap.exists()){
-            return NextResponse.json({
-                success:false,
-                error:"Cant find the cart Instance"
-            },{status:500})
-        }
-
-        await updateDoc(cartQuery,{quantity:newQuantity})
-
-        return NextResponse.json({
-            success:true,
-            msg:`Successfully update the cart quantity to${newQuantity} `
-        })
-    }catch(e){
-        return NextResponse.json({
-            success : false,
-            msg:"Internal Server Error"
-        },{status:500})
-    }
-    
-}
-export async function DELETE(req:NextRequest) {
-    try{
-        const {id} = await req.json();
-
-        const cartQuery = doc(db, "carts", id);
-        const cartDocsSnap = await getDoc(cartQuery);
-        if(!cartDocsSnap.exists()){
-            return NextResponse.json({
-                success:false,
-                error:"Cant find the cart Instance"
-            },{status:500})
-        }
-
-        await deleteDoc(cartQuery)
-
-        return NextResponse.json({
-            success:true,
-            msg:`Successfully Delete the cart item `
-        })
-    }catch(e){
-        return NextResponse.json({
-            success : false,
-            msg:"Internal Server Error"
-        },{status:500})
-    }
-    
 }
