@@ -185,8 +185,8 @@ export default function ProductList() {
 
       {/* ✅ Testimonials Section */}
       <AnimatedTestimonials testimonials={[
-        { quote: "Best service ever!", name: "John Doe", designation: "Customer", src: "/images/testimonial1.jpg" },
-        { quote: "Amazing experience!", name: "Jane Smith", designation: "Shopper", src: "/images/testimonial2.jpg" },
+        { quote: "Best service ever!", name: "samarth gupta", designation: "co-owner", src: "/images/testimonial1.jpg" },
+        { quote: "Amazing experience!", name: "pankaj gupta", designation: "owner", src: "/images/testimonial2.jpg" },
       ]} autoplay={true} />
     </div>
   );
