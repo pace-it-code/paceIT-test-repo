@@ -1,7 +1,8 @@
 "use client";
 import { useState, useEffect } from "react";
-import api from "./utils/api"; // Axios instance
+import api from "../utils/api";
 import Link from "next/link";
+import ProductCard from "../../components/ProductCard";
 
 export default function ProductList() {
   const [products, setProducts] = useState<any[]>([]);
@@ -12,7 +13,7 @@ export default function ProductList() {
     const fetchProducts = async () => {
       try {
         const res = await api.get("/");
-        setProducts(res.data.data); // Set products from API response
+        setProducts(res.data.data);
       } catch (err: any) {
         console.error("Error fetching products:", err.message);
         setError("Failed to load products");
@@ -20,7 +21,6 @@ export default function ProductList() {
         setLoading(false);
       }
     };
-
     fetchProducts();
   }, []);
 
@@ -32,16 +32,9 @@ export default function ProductList() {
       <h1 className="text-2xl font-bold">Product List</h1>
       <Link href="/add" className="btn bg-blue-500 text-white p-2 rounded">Add Product</Link>
       <div className="grid grid-cols-3 gap-4 mt-4">
-        {products.length === 0 ? (
-          <p>No products found.</p>
-        ) : (
-          products.map((product) => (
-            <div key={product.id} className="p-4 border rounded shadow">
-              <h2 className="text-lg font-semibold">{product.name}</h2>
-              <p>Price: ${product.price}</p>
-            </div>
-          ))
-        )}
+        {products.length === 0 ? <p>No products found.</p> : products.map((product) => (
+          <ProductCard key={product.id} product={product} />
+        ))}
       </div>
     </div>
   );
