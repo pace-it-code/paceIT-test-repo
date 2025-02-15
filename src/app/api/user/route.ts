@@ -1,51 +1,45 @@
-import { NextResponse } from 'next/server';
-import { db } from '../../../../utils/firebase';
-import { collection, addDoc, getDocs, query, where } from 'firebase/firestore';
-import { User } from '../../../../types/types';
+import { NextRequest, NextResponse } from "next/server";
+import { db } from "../../../../utils/firebase";
+import { collection, addDoc, getDocs, getDoc, doc } from "firebase/firestore";
+import { User } from "../../../../types/types";
 
-export async function POST(request: Request) {
+export async function POST(req: NextRequest) {
   try {
-    const body = await request.json();
+    const body = await req.json();
     const { email, name, password } = body;
 
     if (!email || !name || !password) {
-      return NextResponse.json({
-        success: false,
-        error: 'Please provide all required fields'
-      }, { status: 400 });
+      return NextResponse.json({ success: false, error: "Missing required fields" }, { status: 400 });
     }
 
-    // Check if user exists
-    const userQuery = query(collection(db, "users"), where("email", "==", email));
-    const userDocs = await getDocs(userQuery);
-
-    if (!userDocs.empty) {
-      return NextResponse.json({
-        success: false,
-        error: 'User already exists'
-      }, { status: 400 });
-    }
-
-    const user: Omit<User, 'id'> = {
+    // Firestore auto-generates the user ID
+    const newUser: Omit<User, "id"> = {
       email,
       name,
-      createdAt: new Date().toISOString()
+      password, // Consider hashing before storing
+      cart: [],
     };
 
-    const docRef = await addDoc(collection(db, "users"), user);
+    const docRef = await addDoc(collection(db, "users"), newUser);
+    const createdUser = { id: docRef.id, ...newUser };
 
-    return NextResponse.json({
-      success: true,
-      data: {
-        id: docRef.id,
-        ...user
-      }
-    }, { status: 201 });
+    return NextResponse.json({ success: true, data: createdUser }, { status: 201 });
   } catch (error) {
-    console.error('Error creating user:', error);
-    return NextResponse.json({
-      success: false,
-      error: 'Error creating user'
-    }, { status: 500 });
+    console.error("Error creating user:", error);
+    return NextResponse.json({ success: false, error: "Error creating user" }, { status: 500 });
+  }
+}
+export async function GET() {
+  try {
+    const usersSnapshot = await getDocs(collection(db, "users"));
+    const users = usersSnapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+
+    return NextResponse.json({ success: true, data: users }, { status: 200 });
+  } catch (error) {
+    console.error("Error fetching users:", error);
+    return NextResponse.json({ success: false, error: "Error fetching users" }, { status: 500 });
   }
 }

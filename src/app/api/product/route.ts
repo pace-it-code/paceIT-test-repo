@@ -1,80 +1,81 @@
-// app/api/products/route.ts
-import { NextRequest, NextResponse } from 'next/server';
-import { db } from '../../../../utils/firebase';
-import { collection, addDoc ,getDoc,getDocs, query, where, doc, deleteDoc} from 'firebase/firestore';
-import { AsyncCallbackSet } from 'next/dist/server/lib/async-callback-set';
-import { cloneElement } from 'react';
+import { NextRequest, NextResponse } from "next/server";
+import { collection, addDoc, getDocs, DocumentData, doc, getDoc, deleteDoc } from "firebase/firestore";
+import { db } from "../../../../utils/firebase";
 
-interface Product {
-  name: string;
-  price: number;
-  description: string;
-  category: string;
-  stock: number;
-  createdAt: string;
-}
-
-export async function POST(request: Request) {
+export async function POST(req: NextRequest) {
   try {
-    const body = await request.json();
-    const { name, price, description, category, stock } = body;
+    const body = await req.json();
+    const { name, price, description, category, stock, images } = body;
 
-    // Validation
-    if (!name || !price || !description || !category || !stock) {
-      return NextResponse.json({
-        success: false,
-        error: 'Please provide all required fields'
-      }, { status: 400 });
+    if (!name || !price || !description || !category || !stock || !images || !Array.isArray(images)) {
+      return NextResponse.json({ success: false, error: "Missing required fields" }, { status: 400 });
     }
 
-    // Create product object
-    const product: Product = {
+    const newProduct = {
       name,
-      price: Number(price),
       description,
+      price,
       category,
-      stock: Number(stock),
-      createdAt: new Date().toISOString()
+      stock,
+      images,
+      createdAt: new Date().toISOString(),
     };
 
-    // Add to Firestore
-    const docRef = await addDoc(collection(db, "products"), product);
+    const docRef = await addDoc(collection(db, "products"), newProduct);
+    return NextResponse.json({ success: true, data: { id: docRef.id, ...newProduct } }, { status: 201 });
+  } catch (error) {
+    console.error("Error adding product:", error);
+    return NextResponse.json({ success: false, error: "Error adding product" }, { status: 500 });
+  }
+}
+
+
+export async function GET() {
+  try {
+    const productsSnapshot = await getDocs(collection(db, "products"));
+    
+    if (productsSnapshot.empty) {
+      return NextResponse.json({
+        success: false,
+        error: "No products found",
+      }, { status: 404 });
+    }
+
+    const products = productsSnapshot.docs.map((doc: DocumentData) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
 
     return NextResponse.json({
       success: true,
-      data: {
-        id: docRef.id,
-        ...product
-      }
-    }, { status: 201 });
-
+      data: products,
+      message: "Successfully fetched all products",
+    }, { status: 200 });
   } catch (error) {
-    console.error('Error creating product:', error);
+    console.error("Error fetching products:", error);
     return NextResponse.json({
       success: false,
-      error: 'Error creating product'
+      error: "Error fetching products",
     }, { status: 500 });
   }
 }
 
-export async function GET(req:NextResponse) { 
-  const productDocs = await getDocs(collection(db,"products"));
-  const products = productDocs.docs.map((doc)=>({
-    id:doc.id,
-    ...doc.data(),
-  }));
-  if(!products){
-    return NextResponse.json({
-      success:false,
-      error:"No data of product"
-    })
+export async function DELETE(req: NextRequest) {
+  try {
+    const body = await req.json();
+    const { id } = body;
+
+    if (!id) return NextResponse.json({ success: false, error: "Product ID is required" }, { status: 400 });
+
+    const productRef = doc(db, "products", id);
+    const productSnap = await getDoc(productRef);
+
+    if (!productSnap.exists()) return NextResponse.json({ success: false, error: "Product not found" }, { status: 404 });
+
+    await deleteDoc(productRef);
+
+    return NextResponse.json({ success: true, message: "Product deleted successfully" }, { status: 200 });
+  } catch (error) {
+    return NextResponse.json({ success: false, error: "Error deleting product" }, { status: 500 });
   }
-
-  return NextResponse.json({
-    success:true,
-    data:products,
-    msg:"Successfully fetched all products"
-  })
-
 }
-
