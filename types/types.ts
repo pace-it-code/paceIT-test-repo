@@ -1,10 +1,8 @@
 export interface Product {
-    id: string;
     name: string;
     price: number;
     description: string;
     category: string;
-    imageUrl: string;
     stock: number;
     createdAt: string;
   }
@@ -18,6 +16,7 @@ export interface Product {
   export interface CartItem {
     productId: string;
     quantity: number;
+    price:number
   }
   
   export interface Order {

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '../../../../utils/firebase';
 import { collection, addDoc, getDocs,getDoc, query, where, deleteDoc, doc, updateDoc } from 'firebase/firestore';
-import { CartItem } from '../../../../types/types';
+import { CartItem, Product } from '../../../../types/types';
 import { stat } from 'fs';
 
 export async function POST(request: Request) {
@@ -16,9 +16,20 @@ export async function POST(request: Request) {
       }, { status: 400 });
     }
 
+    const productRef = doc(db, "products", productId);
+    const productSnap = await getDoc(productRef);
+    if(!productSnap.exists()){
+        return NextResponse.json({
+            msg:"Internal Error"
+        })
+    }
+    const {price} = productSnap.data() as Product ;
+
+
     const cartItem: CartItem = {
       productId,
-      quantity: Number(quantity)
+      quantity: Number(quantity),
+      price
     };
 
     const docRef = await addDoc(collection(db, "carts"), {
