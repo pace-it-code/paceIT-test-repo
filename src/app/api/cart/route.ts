@@ -3,7 +3,8 @@ import { db } from '../../../../utils/firebase';
 import { collection, addDoc, getDocs,getDoc, query, where, deleteDoc, doc, updateDoc } from 'firebase/firestore';
 import { CartItem, Product } from '../../../../types/types';
 import { stat } from 'fs';
-export async function POST(req: NextRequest) {
+import { User } from '../../../../types/types';
+export async function PUT(req: NextRequest) {
   try {
     const body = await req.json();
     const { userId, productId, quantity } = body;
@@ -25,7 +26,7 @@ export async function POST(req: NextRequest) {
     const existingItemIndex = cart.findIndex((item: CartItem) => item.productId === productId);
 
     if (existingItemIndex !== -1) {
-      cart[existingItemIndex].quantity += quantity;
+      cart[existingItemIndex].quantity = Number(quantity);
     } else {
       cart.push({
         productId,
@@ -65,3 +66,36 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ success: false, error: "Error fetching cart" }, { status: 500 });
   }
 }
+
+
+export async function DELETE(req: NextRequest) {
+    try {
+        const { searchParams } = new URL(req.url);
+        const userId = searchParams.get("userId");
+        const productId = searchParams.get("productId");
+
+        if (!userId || !productId) {
+            return NextResponse.json({ success: false, error: "User ID and Product ID are required" }, { status: 400 });
+        }
+
+        const userRef = doc(db, "users", userId);
+        const userSnap = await getDoc(userRef);
+
+        if (!userSnap.exists()) {
+            return NextResponse.json({ success: false, error: "User not found" }, { status: 404 });
+        }
+
+        const userData = userSnap.data() as User;
+        const updatedCart = userData.cart.filter(item => item.productId !== productId);
+        
+
+        await updateDoc(userRef, { cart: updatedCart });
+
+        return NextResponse.json({ success: true, message: "Cart item removed successfully", data: updatedCart });
+
+    } catch (error) {
+        console.error("Error removing cart item:", error);
+        return NextResponse.json({ success: false, error: "Internal Server Error" }, { status: 500 });
+    }
+}
+
