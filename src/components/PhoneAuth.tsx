@@ -7,7 +7,7 @@ import { getFirestore, doc, setDoc } from "firebase/firestore";
 const db = getFirestore();
 declare global {
   interface Window {
-    recaptchaVerifier: any;
+    recaptchaVerifier: RecaptchaVerifier;
   }
 }
 
