@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import {  useState } from "react";
 import { useRouter } from "next/navigation";
 import { signInWithPopup, getIdToken } from "firebase/auth";
 import { auth, googleProvider, db } from "../../utils/firebase";
@@ -23,6 +23,8 @@ export default function LoginButton() {
       // ✅ Store auth token and user ID
       Cookies.set("authToken", token, { expires: 7, secure: true, sameSite: "Strict" });
       Cookies.set("userId", user.uid, { expires: 7, secure: true, sameSite: "Strict" });
+      localStorage.setItem("userId", user.uid);
+      console.log("✔ User ID stored in localStorage:", user.uid);
 
       // ✅ Save user details in Firestore
       await setDoc(doc(db, "users", user.uid), {

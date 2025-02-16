@@ -1,21 +1,23 @@
 "use client";
+import React from "react";
 import { useState, useEffect } from "react";
 import api from "../utils/api";
 import Link from "next/link";
 import ProductCard from "../../components/ProductCard";
+import { Product } from "../../../types/types";
 
-export default function ProductList() {
-  const [products, setProducts] = useState<any[]>([]);
+export default function ProductList() :  React.ReactElement {
+  const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const res = await api.get("/product");
+        const res = await api.get<{ data: Product[] }>("/product"); // ✅ Type-safe API response
         setProducts(res.data.data);
-      } catch (err: any) {
-        console.error("Error fetching products:", err.message);
+      } catch (err: unknown) { // ✅ Use `unknown` instead of `any`
+        console.error("Error fetching products:", err);
         setError("Failed to load products");
       } finally {
         setLoading(false);

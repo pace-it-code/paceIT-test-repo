@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef, useCallback } from "react";
 import api from "../utils/api";
-// ✅ Import debounce from lodash
+import Image from "next/image";
 
 interface CartItem {
   productId: string;
@@ -16,35 +16,31 @@ export default function CartPage() {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [orderStatus, setOrderStatus] = useState<string | null>(null);
+  const [userId, setUserId] = useState<string>("");
 
-  const userId = typeof window !== "undefined" ? localStorage.getItem("userId") : null;
   const isFetchingRef = useRef(false);
-  const quantityChanges = useRef<Record<string, number>>({}); // ✅ Stores pending updates
+  const quantityChanges = useRef<Record<string, number>>({}); // ✅ Stores the final quantity of each product
+  const latestCartRef = useRef<CartItem[]>([]); // ✅ Stores latest cart state
 
+  // ✅ Get userId safely in useEffect to prevent SSR issues
   useEffect(() => {
-    if (!userId) return;
+    if (typeof window !== "undefined") {
+      const storedUserId = localStorage.getItem("userId") ?? "";
+      setUserId(storedUserId);
+    }
+  }, []);
 
-    fetchCartItems();
-
-    // ✅ Polling with throttling: fetch cart updates every 10 sec
-    const interval = setInterval(() => {
-      if (!isFetchingRef.current) {
-        fetchCartItems();
-      }
-      sendQuantityUpdates(); // ✅ Send batched quantity updates every 10s
-    }, 5000);
-
-    return () => clearInterval(interval);
-  }, [userId]);
-
-  const fetchCartItems = async () => {
-    if (isFetchingRef.current) return;
+  // ✅ Fetch Cart Items
+  const fetchCartItems = useCallback(async () => {
+    if (!userId || isFetchingRef.current) return;
     isFetchingRef.current = true;
 
     try {
       const res = await api.get(`/cart?userId=${userId}`);
       console.log("🛒 Fetched Cart Data:", res.data);
       setCart(res.data.cart);
+      latestCartRef.current = res.data.cart;
     } catch (error) {
       console.error("❌ Error fetching cart:", error);
       setError("Failed to load cart");
@@ -52,9 +48,9 @@ export default function CartPage() {
       isFetchingRef.current = false;
       setLoading(false);
     }
-  };
+  }, [userId]);
 
-  // ✅ Track clicks locally without immediate API call
+  // ✅ Modify Cart Quantity
   const modifyCartQuantity = (productId: string, change: number) => {
     setCart((prevCart) =>
       prevCart.map((item) =>
@@ -62,38 +58,86 @@ export default function CartPage() {
       )
     );
 
-    if (!quantityChanges.current[productId]) {
-      quantityChanges.current[productId] = 0;
-    }
-    quantityChanges.current[productId] += change; // ✅ Accumulate changes
+    // ✅ Store the latest quantity (NOT incremental)
+    const updatedCart = latestCartRef.current.map((item) =>
+      item.productId === productId ? { ...item, quantity: item.quantity + change } : item
+    );
+
+    latestCartRef.current = updatedCart; // ✅ Update reference state
+    quantityChanges.current[productId] = updatedCart.find((item) => item.productId === productId)?.quantity || 0;
   };
 
-  // ✅ Send batched quantity updates every 10 seconds
-  const sendQuantityUpdates = async () => {
-    const updates = Object.entries(quantityChanges.current);
-    if (updates.length === 0) return;
+  // ✅ Send Quantity Updates
+  const sendQuantityUpdates = useCallback(async () => {
+    if (!userId || Object.keys(quantityChanges.current).length === 0) return;
 
     try {
-      console.log("🔄 Sending batched quantity updates:", updates);
+      console.log("🔄 Sending only final quantity updates:", quantityChanges.current);
       await Promise.all(
-        updates.map(([productId, change]) =>
-          api.put("/cart", { userId, productId, quantity: change })
+        Object.entries(quantityChanges.current).map(([productId, quantity]) =>
+          api.put("/cart", { userId, productId, quantity })
         )
       );
       console.log("✅ Quantity updates successful!");
-      quantityChanges.current = {}; // ✅ Reset accumulated changes
+      quantityChanges.current = {}; // ✅ Reset after successful update
     } catch (error) {
       console.error("❌ Error updating cart quantities:", error);
     }
-  };
+  }, [userId]);
 
+  // ✅ Periodic Cart Updates
+  useEffect(() => {
+    if (!userId) return;
+    fetchCartItems();
+    const interval = setInterval(() => {
+      sendQuantityUpdates();
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [userId, fetchCartItems, sendQuantityUpdates]);
+
+  // ✅ Remove Cart Item
   const removeCartItem = async (productId: string) => {
     setCart((prevCart) => prevCart.filter((item) => item.productId !== productId));
+    latestCartRef.current = latestCartRef.current.filter((item) => item.productId !== productId);
+    delete quantityChanges.current[productId];
 
     try {
       await api.delete(`/cart?userId=${userId}&productId=${productId}`);
     } catch (error) {
       console.error("❌ Error removing item:", error);
+    }
+  };
+
+  // ✅ Place Order
+  const placeOrder = async () => {
+    if (!userId) return alert("User ID not found!");
+    if (cart.length === 0) return alert("Cart is empty!");
+
+    try {
+      setOrderStatus("Placing order...");
+      const response = await fetch("/api/order", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ userId }),
+      });
+
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Order placement failed");
+
+      console.log("✅ Order placed:", data);
+      setOrderStatus("🎉 Order Confirmed!");
+      setCart([]);
+      latestCartRef.current = [];
+    } catch (error) {
+      if (error instanceof Error) {
+        console.error("❌ Order Error:", error.message);
+        setOrderStatus(`Error: ${error.message}`);
+      } else {
+        console.error("❌ Unknown Order Error:", error);
+        setOrderStatus("❌ Order placement failed.");
+      }
     }
   };
 
@@ -108,10 +152,13 @@ export default function CartPage() {
       <div className="space-y-4">
         {cart.map((item) => (
           <div key={item.productId} className="p-4 border rounded-lg shadow-md flex items-center justify-between">
-            <img
-              src={item.images?.[0] || "/placeholder.jpg"}
+            {/* ✅ Use `next/image` with placeholder */}
+            <Image
+              src={item.images?.[0] ?? "/images.png"}
               alt={item.name}
-              className="w-20 h-20 object-cover rounded"
+              width={80}
+              height={80}
+              className="object-cover rounded"
             />
             <div className="flex-grow px-4">
               <h2 className="text-lg font-semibold">{item.name}</h2>
@@ -141,6 +188,17 @@ export default function CartPage() {
           </div>
         ))}
       </div>
+
+      <div className="mt-6">
+        <button
+          onClick={placeOrder}
+          className="bg-green-500 text-white px-6 py-3 rounded-lg text-lg font-semibold"
+        >
+          🛒 Order Now
+        </button>
+      </div>
+
+      {orderStatus && <p className="mt-4 text-lg text-blue-600">{orderStatus}</p>}
     </div>
   );
 }

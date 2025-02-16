@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { AxiosError } from "axios";
 import api from "../app/utils/api";
 
 interface ProductFormData {
@@ -46,9 +47,16 @@ export default function ProductForm() {
     try {
       await api.post("/", formData);
       router.push("/product"); // Redirect after success
-    } catch (err: any) {
-      console.error("Error adding product:", err.response ? err.response.data : err.message);
-      setError("Failed to add product.");
+    } catch (error: unknown) {
+      if (error instanceof AxiosError) {
+        console.error("❌ Axios Error:", error.response?.data || error.message);
+        setError(error.response?.data?.message || "❌ Failed to load product");
+        console.log(error)
+      } else {
+        console.error("❌ Unknown Error:", error);
+        setError("❌ An unexpected error occurred.");
+        
+      }
     } finally {
       setLoading(false);
     }
@@ -83,6 +91,8 @@ export default function ProductForm() {
       <button type="submit" className="btn bg-green-500 text-white p-2 rounded" disabled={loading}>
         {loading ? "Adding..." : "Add Product"}
       </button>
+      {error && <p className="text-red-500">{error}</p>}
+
     </form>
   );
 }

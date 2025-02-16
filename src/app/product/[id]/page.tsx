@@ -39,7 +39,6 @@ export default function ProductDetail() {
         const res = await api.get(`/product/${productId}`);
         console.log("📦 Fetched Product Data:", res.data);
         setProduct(res.data.data);
-
       } catch (err) {
         console.error("❌ Error fetching product:", err);
         setError("Failed to load product");
@@ -52,13 +51,8 @@ export default function ProductDetail() {
   }, [productId]);
 
   // ✅ Handle Quantity Change
-  const increaseQuantity = () => {
-    setQuantity((prev) => prev + 1);
-  };
-
-  const decreaseQuantity = () => {
-    setQuantity((prev) => (prev > 1 ? prev - 1 : 1));
-  };
+  const increaseQuantity = () => setQuantity((prev) => prev + 1);
+  const decreaseQuantity = () => setQuantity((prev) => (prev > 1 ? prev - 1 : 1));
 
   // ✅ Optimistic UI Add to Cart
   const addToCart = async () => {
@@ -85,6 +79,10 @@ export default function ProductDetail() {
   if (error) return <p className="text-center text-red-500">❌ {error}</p>;
   if (!product) return <p className="text-center text-gray-500">⚠️ Product not found.</p>;
 
+  // ✅ Ensure there's always an image available
+  const placeholderImage = "/placeholder.jpg";
+  const productImages = product.images && product.images.length > 0 ? product.images : [placeholderImage];
+
   return (
     <div className="container mx-auto px-6 py-20">
       {/* Back Button */}
@@ -97,7 +95,7 @@ export default function ProductDetail() {
         <div className="w-full md:w-1/2 flex gap-4 relative">
           {/* Thumbnails */}
           <div className="h-auto flex flex-col gap-3 w-20">
-            {product.images?.map((img, index) => (
+            {productImages.map((img, index) => (
               <div key={index} className="w-20 h-20 border rounded-lg overflow-hidden">
                 <Image
                   src={img}
@@ -113,9 +111,15 @@ export default function ProductDetail() {
           {/* Main Image */}
           <div className="w-full border rounded-lg shadow-md overflow-hidden relative">
             <Swiper navigation className="w-full">
-              {product.images?.map((img, index) => (
+              {productImages.map((img, index) => (
                 <SwiperSlide key={index}>
-                  <Image src={img} alt="Main Product Image" width={500} height={500} className="w-full object-cover" />
+                  <Image
+                    src={img}
+                    alt="Main Product Image"
+                    width={500}
+                    height={500}
+                    className="w-full object-cover"
+                  />
                 </SwiperSlide>
               ))}
             </Swiper>
