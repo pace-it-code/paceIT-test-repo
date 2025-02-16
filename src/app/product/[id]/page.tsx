@@ -7,7 +7,7 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/thumbs";
-import { Navigation, Thumbs } from "swiper/modules";
+//import { Navigation, Thumbs } from "swiper/modules";
 
 // Dummy Product Data
 const dummyProduct = {
@@ -38,7 +38,7 @@ export default function ProductDetail() {
   const [selectedProduct] = useState(dummyProduct);
   const [selectedWeight, setSelectedWeight] = useState<string>(dummyProduct.weightOptions[0]);
   const [quantity, setQuantity] = useState<number>(1);
-  const [thumbsSwiper, setThumbsSwiper] = useState(null);
+  //const [thumbsSwiper, setThumbsSwiper] = useState(null);
   const router = useRouter();
 
   return (
@@ -67,7 +67,7 @@ export default function ProductDetail() {
           {/* Main Image with Swiper */}
           <div className="w-full border rounded-lg shadow-md overflow-hidden relative">
             <Swiper
-              modules={[Navigation]}
+             // modules={[Navigation]}
               navigation
               className="w-full"
             >
@@ -137,7 +137,7 @@ export default function ProductDetail() {
       <div className="mt-16">
         <h2 className="text-2xl font-bold mb-4">Products Related to This Item</h2>
         <Swiper
-          modules={[Navigation]}
+         // modules={[Navigation]}
           spaceBetween={20}
           slidesPerView={2}
           breakpoints={{
