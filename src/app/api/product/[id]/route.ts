@@ -2,9 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "../../../../../utils/firebase";
 import { doc, getDoc ,deleteDoc} from "firebase/firestore";
 
-export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(request: NextRequest) {
   try {
-    const { id } = params;
+    const  id  = request.url.split('/').pop();
 
     if (!id) {
       return NextResponse.json({ success: false, error: "Product ID is required" }, { status: 400 });
@@ -29,10 +29,10 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
   }
 }
 
-export async function DELETE(req: NextRequest,{params}:{params: {id: string}}) {
+export async function DELETE(req: NextRequest) {
   try {
     
-    const { id } = await params;
+    const  id  = req.url.split('/').pop()
 
     if (!id) return NextResponse.json({ success: false, error: "Product ID is required" }, { status: 400 });
 
@@ -44,7 +44,7 @@ export async function DELETE(req: NextRequest,{params}:{params: {id: string}}) {
     await deleteDoc(productRef);
 
     return NextResponse.json({ success: true, message: "Product deleted successfully" }, { status: 200 });
-  } catch (error) {
-    return NextResponse.json({ success: false, error: "Error deleting product" }, { status: 500 });
+  } catch (e) {
+    return NextResponse.json({ success: false, error: "Error deleting product"+e }, { status: 500 });
   }
 }

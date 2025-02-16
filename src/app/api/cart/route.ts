@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '../../../../utils/firebase';
-import { collection, addDoc, getDocs,getDoc, query, where, deleteDoc, doc, updateDoc } from 'firebase/firestore';
-import { CartItem, Product } from '../../../../types/types';
-import { stat } from 'fs';
+import { getDoc, doc, updateDoc } from 'firebase/firestore';
+import { CartItem} from '../../../../types/types';
 import { User } from '../../../../types/types';
+
 export async function PUT(req: NextRequest) {
   try {
     const body = await req.json();
@@ -21,7 +21,7 @@ export async function PUT(req: NextRequest) {
     }
 
     const userData = userSnap.data();
-    let cart = userData.cart || [];
+    const cart = userData.cart || [];
 
     const existingItemIndex = cart.findIndex((item: CartItem) => item.productId === productId);
 
