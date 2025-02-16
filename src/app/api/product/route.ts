@@ -60,22 +60,4 @@ export async function GET() {
   }
 }
 
-export async function DELETE(req: NextRequest) {
-  try {
-    const body = await req.json();
-    const { id } = body;
 
-    if (!id) return NextResponse.json({ success: false, error: "Product ID is required" }, { status: 400 });
-
-    const productRef = doc(db, "products", id);
-    const productSnap = await getDoc(productRef);
-
-    if (!productSnap.exists()) return NextResponse.json({ success: false, error: "Product not found" }, { status: 404 });
-
-    await deleteDoc(productRef);
-
-    return NextResponse.json({ success: true, message: "Product deleted successfully" }, { status: 200 });
-  } catch (error) {
-    return NextResponse.json({ success: false, error: "Error deleting product" }, { status: 500 });
-  }
-}
