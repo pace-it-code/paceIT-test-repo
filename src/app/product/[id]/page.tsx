@@ -37,6 +37,7 @@ export default function ProductDetail() {
         const res = await api.get(`/product/${productId}`);
         console.log("📦 Fetched Product Data:", res.data);
         setProduct(res.data.data);
+
       } catch (err) {
         console.error("❌ Error fetching product:", err);
         setError("Failed to load product");

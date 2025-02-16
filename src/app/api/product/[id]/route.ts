@@ -2,9 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "../../../../../utils/firebase";
 import { doc, getDoc ,deleteDoc} from "firebase/firestore";
 
-export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(request: NextRequest, { params }: { params:{ id: string } }) {
   try {
-    const { id } = params;
+    const { id } = await params;
 
     if (!id) {
       return NextResponse.json({ success: false, error: "Product ID is required" }, { status: 400 });
