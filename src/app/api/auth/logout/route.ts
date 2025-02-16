@@ -5,7 +5,7 @@ export async function POST() {
   const headers = new Headers();
   headers.append(
     "Set-Cookie",
-    cookie.serialize("auth_token", "", {
+    cookie.serialize("auth_token_jwt", "", {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       expires: new Date(0),
@@ -15,3 +15,4 @@ export async function POST() {
 
   return NextResponse.json({ message: "Logged out" }, { headers });
 }
+

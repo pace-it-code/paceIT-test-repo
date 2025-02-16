@@ -7,10 +7,7 @@ export default function LogoutButton() {
 
   const handleLogout = async () => {
     await auth.signOut(); // Firebase logout
-
-    // ✅ Remove cookie via API
     await fetch("/api/auth/logout", { method: "POST" });
-
     router.push("/login");
   };
 

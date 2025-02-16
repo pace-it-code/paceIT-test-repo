@@ -14,7 +14,7 @@ export async function POST(req: NextRequest) {
     const headers = new Headers();
     headers.append(
       "Set-Cookie",
-      cookie.serialize("auth_token", token, {
+      cookie.serialize("auth_token_jwt", token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         maxAge: 60 * 60 * 24 * 7, // 7 days
