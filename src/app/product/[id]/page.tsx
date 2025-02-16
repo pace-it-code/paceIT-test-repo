@@ -29,6 +29,8 @@ export default function ProductDetail() {
   const [adding, setAdding] = useState(false);
   const router = useRouter();
 
+  const userId = localStorage.getItem("userId");
+
   useEffect(() => {
     if (!productId) return;
 
@@ -65,7 +67,7 @@ export default function ProductDetail() {
 
     try {
       await api.put("/cart", {
-        userId: "8KKj9YgkkVZ66UOx00u1dT7Xk4F2",
+        userId: userId,
         productId: product.id,
         quantity: quantity,
       });
