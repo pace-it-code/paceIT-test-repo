@@ -7,7 +7,7 @@ export default function LoginPage() {
     <div className="flex items-center justify-center h-screen">
       <PhoneAuth />
       <LoginButton />
-      <LogoutButton />
+     
     </div>
   );
 }
