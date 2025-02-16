@@ -3,22 +3,22 @@ import React, { useState } from "react";
 import { Search, ShoppingCart, User, Menu, X } from "lucide-react";
 
 
-export default function AppLayout() {
-  return (
-    <div className="flex flex-col min-h-screen">
-      <Navbar />
-      <main className="flex-grow p-6 pt-24 md:pt-20">
-        <h1 className="text-3xl font-bold text-center">Welcome to Our Store</h1>
-        <p className="text-center text-gray-600 mt-2">
-          Find the best deals on high-quality products.
-        </p>
-      </main>
+// export default function AppLayout() {
+//   return (
+//     <div className="flex flex-col min-h-screen">
+//       <Navbar />
+//       <main className="flex-grow p-6 pt-24 md:pt-20">
+//         <h1 className="text-3xl font-bold text-center">Welcome to Our Store</h1>
+//         <p className="text-center text-gray-600 mt-2">
+//           Find the best deals on high-quality products.
+//         </p>
+//       </main>
      
-    </div>
-  );
-}
+//     </div>
+//   );
+// }
 
-function Navbar() {
+ export default function Navbar() {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -34,7 +34,7 @@ function Navbar() {
   };
 
   return (
-    <nav className="fixed top-0 left-0 right-0 bg-black p-4 shadow-md z-50">
+    <nav className="fixed top-0 left-0 right-0 bg-greens p-4 shadow-md z-50">
       <div className="max-w-7xl mx-auto flex items-center justify-between">
         
         {/* Mobile Menu Button */}

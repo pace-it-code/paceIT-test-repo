@@ -18,11 +18,11 @@
             <div>
               <h4 className="text-lg font-semibold text-white">Quick Links</h4>
               <ul className="mt-2 space-y-2">
-                <li className="cursor-pointer text-gray-400 hover:text-blue-400">Home</li>
-                <li className="cursor-pointer text-gray-400 hover:text-blue-400">Products</li>
-                <li className="cursor-pointer text-gray-400 hover:text-blue-400">Cart</li>
-                <li className="cursor-pointer text-gray-400 hover:text-blue-400">Contact</li>
-                <li className="cursor-pointer text-gray-400 hover:text-blue-400">About Us</li>
+                <li className="cursor-pointer  hover:text-orange">Home</li>
+                <li className="cursor-pointer  hover:text-orange">Products</li>
+                <li className="cursor-pointer  hover:text-orange">Cart</li>
+                <li className="cursor-pointer  hover:text-orange">Contact</li>
+                <li className="cursor-pointer  hover:text-orange">About Us</li>
               </ul>
             </div>
   

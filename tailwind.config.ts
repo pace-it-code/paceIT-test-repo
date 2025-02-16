@@ -10,6 +10,12 @@ export default {
   theme: {
   	extend: {
   		colors: {
+			greens:'#4F772D',
+			warmbrown:'#D4A373',
+			orange:'#F4A261',
+			olive: '#626F47',
+			cream:'#FAF3E0',
+			darkgray:'#3E3E3E',
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',
   			card: {
