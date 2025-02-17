@@ -16,9 +16,9 @@ export default function ProductBanner() {
         pagination={{ clickable: true }}
         className="w-full"
       >
-        {["/banner1.png", "/banner2.png", "/banner3.png"].map((img, index) => (
+        {["/banner1.jpg", "/banner2.jpeg", "/banner3.jpg"].map((img, index) => (
           <SwiperSlide key={index}>
-            <div className="relative w-full h-36 md:h-44 lg:h-48">
+            <div className="relative w-full h-42 md:h-44 lg:h-48">
               <Image 
                 src={img} 
                 fill 
