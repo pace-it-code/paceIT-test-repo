@@ -3,6 +3,7 @@ import ProductBanner from "../components/ProductBanner";
 import FeaturesSection from "../components/FeatureSection";
 import Testimonials from "../components/Testimonials";
 import { Product } from "../../types/types";
+import Categories from "@/components/Categories";
 
 export const dynamic = "force-dynamic"; // ✅ Forces server-side rendering
 
@@ -34,8 +35,11 @@ export default async function ProductList() {
       <h1 className="text-6xl font-bold text-greens text-center">Welcome to Our Store</h1>
       <p className="text-lg text-darkgray mt-2">Find the best deals on high-quality products.</p>
 
+
       <ProductBanner />
-      <h1 className="text-2xl font-bold text-center mb-3">Product List</h1>
+
+      <Categories />
+
 
       {error ? (
         <p className="text-center text-red-500 text-lg mt-4">❌ {error}</p>

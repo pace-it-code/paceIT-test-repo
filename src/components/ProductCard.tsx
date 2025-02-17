@@ -6,7 +6,7 @@ interface Product {
   name: string;
   description: string;
   category: string;
-  stock: number;
+  
   price: number;
   images?: string[]; // ✅ Optional image array
 }
@@ -29,10 +29,10 @@ export default function ProductCard({ product }: { product: Product }) {
       </div>
 
       {/* ✅ Product Details */}
-      <h2 className="text-lg font-semibold text-greens">{product.name}</h2>
+      <h2 className="text-lg font-light text-greens text-center">{product.name}</h2>
       <p className="text-darkgray line-clamp-2">{product.description}</p>
       <p className="text-warmbrown">Category: {product.category}</p>
-      <p className="text-warmbrown">Stock: {product.stock}</p>
+     
       <p className="font-semibold text-cream">Price: ${product.price}</p>
     </Link>
   );

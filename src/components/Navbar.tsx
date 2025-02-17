@@ -1,28 +1,19 @@
 "use client";
+import { useLogout } from "@/app/hooks/logout";
+import Link from "next/link";
 import React, { useState } from "react";
-import { Search, ShoppingCart, User, Menu, X } from "lucide-react";
+import { Search, ShoppingCart, User, Menu, X,Languages } from "lucide-react";
 
 
-// export default function AppLayout() {
-//   return (
-//     <div className="flex flex-col min-h-screen">
-//       <Navbar />
-//       <main className="flex-grow p-6 pt-24 md:pt-20">
-//         <h1 className="text-3xl font-bold text-center">Welcome to Our Store</h1>
-//         <p className="text-center text-gray-600 mt-2">
-//           Find the best deals on high-quality products.
-//         </p>
-//       </main>
-     
-//     </div>
-//   );
-// }
+
+
 
  export default function Navbar() {
+
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-
+  const handlelogout = useLogout();
   const toggleProfile = () => setIsProfileOpen(!isProfileOpen);
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) =>
@@ -43,7 +34,7 @@ import { Search, ShoppingCart, User, Menu, X } from "lucide-react";
         </button>
 
         <div className="flex-shrink-0">
-          <span className="text-2xl font-bold text-white">The Company</span>
+          <Link href="/" className="text-2xl font-bold text-white">The Company</Link>
         </div>
 
         {/* Centered Search Bar - Responsive */}
@@ -64,10 +55,13 @@ import { Search, ShoppingCart, User, Menu, X } from "lucide-react";
 
         {/* Icons on the Right */}
         <div className="flex items-center space-x-4">
+          <Link href="/cart">
           <ShoppingCart className="h-6 w-6 text-white" />
+          </Link>
           <button onClick={toggleProfile} className="focus:outline-none">
             <User className="h-6 w-6 text-white" />
           </button>
+          <Languages  className="h-6 w-6 text-white"strokeWidth={1.75} />
         </div>
       </div>
 
@@ -92,9 +86,11 @@ import { Search, ShoppingCart, User, Menu, X } from "lucide-react";
             <li className="px-4 py-2 text-gray-800 hover:bg-gray-100 cursor-pointer">
               Orders
             </li>
+           
             <li className="px-4 py-2 text-gray-800 hover:bg-gray-100 cursor-pointer">
-              Logout
+             <button onClick={handlelogout}>logout</button>
             </li>
+            
           </ul>
         </div>
       )}

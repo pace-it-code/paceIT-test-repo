@@ -15,7 +15,7 @@ interface Product {
   price: number | string;
   images?: string[];
   category: string;
-  stock: number;
+
   description: string;
 }
 
@@ -131,7 +131,7 @@ export default function ProductDetail() {
           <h1 className="text-3xl font-bold">{product.name}</h1>
           <p className="text-lg text-gray-700 mt-2">{product.description}</p>
           <p className="text-md text-gray-600">Category: {product.category}</p>
-          <p className="text-md text-gray-600">Stock: {product.stock}</p>
+          
 
           {/* Floating Purchase Box */}
           <div className="bg-white shadow-lg border p-6 rounded-lg mt-6 w-full md:w-3/4">
