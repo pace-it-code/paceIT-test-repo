@@ -1,5 +1,5 @@
 "use client";
-import { useLogout } from "@/app/hooks/logout";
+import { useLogout } from "@/app/hooks/uselogout";
 import Link from "next/link";
 import React, { useState } from "react";
 import { Search, ShoppingCart, User, Menu, X,Languages } from "lucide-react";
