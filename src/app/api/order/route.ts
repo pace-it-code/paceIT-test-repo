@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "../../../../utils/firebase";
-import { collection, addDoc, doc, getDoc } from "firebase/firestore";
+import { collection, addDoc, doc, getDoc, where, query, getDocs } from "firebase/firestore";
+import { Order } from "../../../../types/types";
 
 export async function POST(req: NextRequest) {
   try {
@@ -76,3 +77,61 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: false, error: "Error creating order" }, { status: 500 });
   }
 }
+
+export async function GET(req:NextRequest) {  //get all products and 1 product. for all products send userId and for single order send orderId
+  try{
+
+    const url = new URL(req.url);
+    const userId = url.searchParams.get('userId');
+    const orderId = url.searchParams.get('orderId');
+    if(orderId){
+      const orderRef = doc(db, 'orders', orderId);
+      const orderSnap = await getDoc(orderRef);
+      
+      if (!orderSnap.exists()) {
+        return null;
+      }
+      
+      const orderData = {
+        id: orderSnap.id,
+        ...orderSnap.data()
+      } as Order;
+      return NextResponse.json({
+        success: true,
+        data:orderData,
+        msg:"Successfully fetched orders"
+      })
+      
+  }else{
+    const orderRef = collection(db,'orders');
+      const orderQuery = query(orderRef,where('userId',"==",userId))   
+
+      const orderSnap = await getDocs(orderQuery);
+
+      const orders:Order[]=[];
+
+      orderSnap.forEach((doc) => {
+        orders.push({
+          id: doc.id,
+          ...doc.data()
+        } as Order);
+      });
+
+      return NextResponse.json({
+        success:true,
+        data:orders,
+        msg:`Fetched all order of the user ${userId} successfully !`
+
+      })
+
+   
+  }
+  }catch(e){
+    return NextResponse.json({
+      success:false,
+      msg:"Error occured while fetching user order "+e
+    })
+  }
+}
+
+
