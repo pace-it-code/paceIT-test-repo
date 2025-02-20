@@ -10,14 +10,16 @@ export interface Product {
   createdAt: string;  // Timestamp of product creation
 }
 
-  export interface User {
-    id: string;         // Firestore-generated User ID
-    email: string;      // User Email
-    name: string;       // User Name
-    password: string;   // Hashed Password (should be hashed before storing)
-    cart: CartItem[];   // Array of Cart Items
-  }
-  
+
+    export interface User {
+      id: string;         // Firestore-generated User ID
+      email: string;      // User Email
+      name: string;       // User Name
+      password: string;   // Hashed Password (should be hashed before storing)
+      address: Address[];
+      cart: CartItem[];   // Array of Cart Items
+    }
+    
   
   export interface CartItem {
     productId: string; // ID of the product in the cart
@@ -57,3 +59,11 @@ export interface Product {
     createdAt: string;  // Timestamp of review submission
   }
   
+  export interface Address{
+    id:string,
+    line1:string,
+    line2?:string,
+    state:string,
+    city:string,
+    zip:string
+  }
