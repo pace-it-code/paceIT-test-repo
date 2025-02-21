@@ -13,7 +13,9 @@ interface Product {
 
 export default function ProductCard({ product }: { product: Product }) {
   // ✅ Ensure at least one image exists, otherwise use a plavceholder
-  const productImage = product.images?.[0] ?? "/images.png";
+  const productImage = product.images?.[0]
+  ? product.images[0].replace('/upload/', '/upload/f_auto,q_auto/')
+  : "/images.png";
 
   return (
     <Link href={`/product/${product.id}`} className="p-4 border rounded shadow hover:shadow-md block bg-white">

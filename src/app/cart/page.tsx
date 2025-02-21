@@ -1,10 +1,13 @@
 "use client";
 
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { useCart } from "../hooks/useCart";
 import { useUserId } from "../hooks/useId";
 
+
 export default function CartPage() {
+   const router = useRouter();
   const userId = useUserId();
   const {
     cart,
@@ -12,43 +15,17 @@ export default function CartPage() {
     error,
     modifyCartQuantity,
     removeCartItem,
-    setOrderStatus,
+   
     orderStatus,
-    setCart,
-    latestCartRef,
+    
+   
   } = useCart(userId);
 
-  const placeOrder = async () => {
-    if (!userId) return alert("User ID not found!");
-    if (cart.length === 0) return alert("Cart is empty!");
+  const handleorder =()=>{
+    router.push("/")
+  }
 
-    try {
-      setOrderStatus("Placing order...");
-      const response = await fetch("/api/order", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ userId }),
-      });
-
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error || "Order placement failed");
-
-      console.log("✅ Order placed:", data);
-      setOrderStatus("🎉 Order Confirmed!");
-      setCart([]);
-      latestCartRef.current = [];
-    } catch (error) {
-      if (error instanceof Error) {
-        console.error("❌ Order Error:", error.message);
-        setOrderStatus(`Error: ${error.message}`);
-      } else {
-        console.error("❌ Unknown Order Error:", error);
-        setOrderStatus("❌ Order placement failed.");
-      }
-    }
-  };
+  
   
   if (loading) {
     return <p className="text-center text-lg py-36 ">⏳ Loading cart...</p>;
@@ -112,7 +89,7 @@ export default function CartPage() {
   
           <div className="mt-6">
             <button
-              onClick={placeOrder}
+              onClick={handleorder}
               className="bg-green-500 text-white px-6 py-3 rounded-lg text-lg font-semibold"
             >
               🛒 Order Now
