@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useUserId } from "../hooks/useId";
+import api from "../utils/api";
 
 interface Address {
     id?: string;
@@ -40,13 +41,12 @@ export default function AddressPage() {
     const handleSubmit = async () => {
         if (!userId) return;
 
-        const response = await fetch("/api/address", {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ userId, address }),
+        const response = await api.put("/address", {
+            userId,
+            address,
         });
 
-        const data = await response.json();
+        const data = response.data;
 
         if (data?.message) {
             router.push("/order");

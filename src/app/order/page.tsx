@@ -1,5 +1,5 @@
 "use client";
-
+import api from "../utils/api";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useCart } from "../hooks/useCart";
@@ -26,8 +26,8 @@ export default function ConfirmOrderPage() {
     const fetchAddress = async () => {
       if (!userId) return;
       try {
-        const res = await fetch(`/api/address?userId=${userId}`);
-        const data = await res.json();
+        const res = await api.get(`/address?userId=${userId}`);
+        const data = res.data;
         if (data?.success && Array.isArray(data.data) && data.data.length > 0) {
           setAddress(data.data[0]); // Automatically select the first address
         } else {
@@ -44,13 +44,12 @@ export default function ConfirmOrderPage() {
   const handlePlaceOrder = async () => {
     if (!userId || !address) return;
 
-    const response = await fetch("/api/order", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ userId, addressId: address.id }),
+    const response = await api.post("/order", {
+        userId,
+        addressId: address.id,
     });
-
-    const data = await response.json();
+    
+        const data = response.data;
 
     if (data?.success) {
       alert("Order placed successfully!");
