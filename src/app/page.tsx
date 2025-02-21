@@ -12,7 +12,7 @@ export default async function ProductList() {
   let error: string | null = null;
 
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000"}/api/product`, {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000"}/product`, {
       cache: "no-store", // ✅ Ensures fresh data but avoids static generation issues
     });
 
