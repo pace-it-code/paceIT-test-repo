@@ -14,9 +14,9 @@ export default function ProductList() :  React.ReactElement {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const res = await api.get<{ data: Product[] }>("/product"); // ✅ Type-safe API response
+        const res = await api.get<{ data: Product[] }>("/product"); 
         setProducts(res.data.data);
-      } catch (err: unknown) { // ✅ Use `unknown` instead of `any`
+      } catch (err: unknown) { 
         console.error("Error fetching products:", err);
         setError("Failed to load products");
       } finally {

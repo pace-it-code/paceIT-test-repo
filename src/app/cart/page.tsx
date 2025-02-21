@@ -22,7 +22,7 @@ export default function CartPage() {
   } = useCart(userId);
 
   const handleorder =()=>{
-    router.push("/")
+    router.push("/address")
   }
 
   
