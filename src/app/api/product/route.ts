@@ -16,32 +16,37 @@ export async function POST(req: NextRequest) {
     const name = formData.get("name") as string;
     const description = formData.get("description") as string;
     const category = formData.get("category") as string;
-    const stock = Number(formData.get("stock"));
     const manufacturer = formData.get("manufacturer") as string;
     const composition = formData.get("composition") as string;
     const commonlyUsedFor = formData.getAll("commonlyUsedFor") as string[];
     const avoidForCrops = formData.getAll("avoidForCrops") as string[];
     const benefits = formData.getAll("benefits") as string[];
-    const method = formData.get("method") as string;
-    
-    const images = formData.getAll("images") as File[];
 
     // Extracting dosage details
-    const doses = JSON.parse(formData.get("doses") as string) as {
-      quantity: string;
-      seedWeight: string;
+    const method = formData.get("method") as string;
+    const dosage = JSON.parse(formData.get("dosage") as string) as {
+      dose: string;
+      arce: string;
+    };
+
+    // Extracting pricing details
+    const pricing = JSON.parse(formData.get("pricing") as string) as {
+      packageSize: string;
       price: number;
     }[];
+
+    // Extract images
+    const images = formData.getAll("images") as File[];
 
     if (
       !name ||
       !description ||
       !category ||
-      isNaN(stock) ||
       !manufacturer ||
       !composition ||
       !method ||
-      !doses.length ||
+      !dosage ||
+      !pricing.length ||
       !images.length
     ) {
       return NextResponse.json({ success: false, error: "Missing required fields" }, { status: 400 });
@@ -63,16 +68,16 @@ export async function POST(req: NextRequest) {
       name,
       description,
       category,
-      stock,
       images: uploadedImageUrls,
       createdAt: new Date().toISOString(),
       manufacturer,
       composition,
       commonlyUsedFor,
       avoidForCrops,
+      pricing,
       dosage: {
         method,
-        doses,
+        dosage,
       },
       benefits,
     };
@@ -86,6 +91,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: false, error: "Error adding product" }, { status: 500 });
   }
 }
+
 
 
 

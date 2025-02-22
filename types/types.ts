@@ -15,7 +15,7 @@
       name: string;               // Product Name (e.g., 'Bayer Evergol Xtend')
       description: string;        // Detailed Product Description          
       category: string;           // Category (e.g., 'Seed Treatment')
-      stock: number;              // Available Stock
+      pricing:Pricing[];
       images: string[];           // Array of image URLs
       createdAt: string;          // Timestamp of product creation
       manufacturer: string;       // Manufacturer Name (e.g., 'Bayer Crop Science')
@@ -24,11 +24,7 @@
       avoidForCrops: string[];    // Crops to avoid usage (e.g., ['wheat', 'hybrid seed'])
       dosage: {
         method: string;           // Dosage method (e.g., 'Mix with water and rub on seeds')
-        doses: {
-          quantity: string;       // e.g., '1gm', '100gm', '40gm'
-          seedWeight: string;     // e.g., '1kg seed', '100kg seed', '40kg seed'
-          price: number;          // Corresponding price (e.g., 925, 410)
-        }[];
+        dosage:{dose:string,acre:string}
       };
       benefits: string[];         // List of product benefits
     }
