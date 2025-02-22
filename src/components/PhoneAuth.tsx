@@ -50,24 +50,27 @@ export default function PhoneAuth() {
       const result = await confirmationResult.confirm(otp);
       console.log("User verified:", result.user);
   
-      // ✅ Store user data, including phone number
+      const userId = result.user.uid; // ✅ Extract user ID
+      localStorage.setItem("userId", userId); // ✅ Store in localStorage
+  
+      // ✅ Save user to Firestore
       const newUser = {
-        id: result.user.uid, // Firebase UID
-        email: result.user.email || null, // Email (if available)
-        name: result.user.displayName || "Anonymous", // Name (if available)
+        id: userId,
+        email: result.user.email || null,
+        name: result.user.displayName || "Anonymous",
         cart: [],
         createdAt: new Date().toISOString(),
-        phone: result.user.phoneNumber, // ✅ Store verified phone number
+        phone: result.user.phoneNumber,
       };
   
-      // ✅ Save to Firestore
-      await setDoc(doc(db, "users", result.user.uid), newUser, { merge: true });
+      await setDoc(doc(db, "users", userId), newUser, { merge: true });
   
       alert("Phone number verified & saved!");
     } catch (error) {
       console.error("OTP verification failed:", error);
     }
   };
+  
 
   return (
     <div className="p-4">
