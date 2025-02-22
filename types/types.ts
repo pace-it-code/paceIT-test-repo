@@ -1,15 +1,42 @@
 
-export interface Product {
-  id: string;         // Firestore-generated Product ID
-  name: string;       // Product Name
-  description: string;// Product Description
-  price: number;      // Price of the Product
-  category: string;   // Category (e.g., Electronics, Clothing)
-  stock: number;      // Available Stock
-  images: string[];   // Array of image URLs
-  createdAt: string;  // Timestamp of product creation
-}
+    // export interface Product {
+    //   id: string;         // Firestore-generated Product ID
+    //   name: string;       // Product Name
+    //   description: string;// Product Description
+    //   pricing: Pricing[]; // Price of the Product
+    //   category: string;   // Category (e.g., Electronics, Clothing)
+    //   stock: number;      // Available Stock
+    //   images: string[];   // Array of image URLs
+    //   createdAt: string;  // Timestamp of product creation
+    // }
 
+    export interface Product {
+      id: string;                 // Firestore-generated Product ID
+      name: string;               // Product Name (e.g., 'Bayer Evergol Xtend')
+      description: string;        // Detailed Product Description          
+      category: string;           // Category (e.g., 'Seed Treatment')
+      stock: number;              // Available Stock
+      images: string[];           // Array of image URLs
+      createdAt: string;          // Timestamp of product creation
+      manufacturer: string;       // Manufacturer Name (e.g., 'Bayer Crop Science')
+      composition: string;        // Composition / Technical details
+      commonlyUsedFor: string[];  // List of crops commonly used for (e.g., ['corn', 'soybean', 'cereals', 'pulses', 'rice'])
+      avoidForCrops: string[];    // Crops to avoid usage (e.g., ['wheat', 'hybrid seed'])
+      dosage: {
+        method: string;           // Dosage method (e.g., 'Mix with water and rub on seeds')
+        doses: {
+          quantity: string;       // e.g., '1gm', '100gm', '40gm'
+          seedWeight: string;     // e.g., '1kg seed', '100kg seed', '40kg seed'
+          price: number;          // Corresponding price (e.g., 925, 410)
+        }[];
+      };
+      benefits: string[];         // List of product benefits
+    }
+ 
+    export interface Pricing{
+      price:number,
+      packageSize:string
+    }
 
     export interface User {
       id: string;         // Firestore-generated User ID

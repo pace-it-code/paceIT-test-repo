@@ -8,20 +8,42 @@ import cloudinary from '../../../../utils/cloudinary';
 
 
 
-
-
 export async function POST(req: NextRequest) {
   try {
     const formData = await req.formData();
 
+    // Extracting fields
     const name = formData.get("name") as string;
-    const price = formData.get("price") as string;
     const description = formData.get("description") as string;
     const category = formData.get("category") as string;
-    const stock = formData.get("stock") as string;
+    const stock = Number(formData.get("stock"));
+    const manufacturer = formData.get("manufacturer") as string;
+    const composition = formData.get("composition") as string;
+    const commonlyUsedFor = formData.getAll("commonlyUsedFor") as string[];
+    const avoidForCrops = formData.getAll("avoidForCrops") as string[];
+    const benefits = formData.getAll("benefits") as string[];
+    const method = formData.get("method") as string;
+    
     const images = formData.getAll("images") as File[];
 
-    if (!name || !price || !description || !category || !stock || !images.length) {
+    // Extracting dosage details
+    const doses = JSON.parse(formData.get("doses") as string) as {
+      quantity: string;
+      seedWeight: string;
+      price: number;
+    }[];
+
+    if (
+      !name ||
+      !description ||
+      !category ||
+      isNaN(stock) ||
+      !manufacturer ||
+      !composition ||
+      !method ||
+      !doses.length ||
+      !images.length
+    ) {
       return NextResponse.json({ success: false, error: "Missing required fields" }, { status: 400 });
     }
 
@@ -36,17 +58,26 @@ export async function POST(req: NextRequest) {
       uploadedImageUrls.push(uploadResponse.secure_url);
     }
 
-    // Create new product with image URLs
+    // Creating product object
     const newProduct = {
       name,
       description,
-      price,
       category,
       stock,
       images: uploadedImageUrls,
       createdAt: new Date().toISOString(),
+      manufacturer,
+      composition,
+      commonlyUsedFor,
+      avoidForCrops,
+      dosage: {
+        method,
+        doses,
+      },
+      benefits,
     };
 
+    // Adding to Firestore
     const docRef = await addDoc(collection(db, "products"), newProduct);
     return NextResponse.json({ success: true, data: { id: docRef.id, ...newProduct } }, { status: 201 });
 
@@ -55,6 +86,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: false, error: "Error adding product" }, { status: 500 });
   }
 }
+
 
 
 export async function GET() {
