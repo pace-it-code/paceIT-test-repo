@@ -1,12 +1,14 @@
 import { useEffect, useState, useRef, useCallback } from "react";
 import api from "../utils/api";
 
-interface CartItem {
-  productId: string;
-  name: string;
-  price: number;
-  quantity: number;
-  images?: string[];
+ export interface CartItem {
+  productId: string; // ID of the product in the cart
+  quantity: number;  // Number of items added
+  price: number;     // Price at the time of adding
+  name: string;      // Product name (to avoid extra Firestore reads)
+  image: string;     // Main product image
+  packageSize: string; // Selected package size
+  addedAt: string;   // Timestamp when added to cart
 }
 
 export const useCart = (userId: string) => {
@@ -102,3 +104,4 @@ export const useCart = (userId: string) => {
     latestCartRef,
   };
 };
+

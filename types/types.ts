@@ -44,15 +44,15 @@
     }
     
   
-  export interface CartItem {
-    productId: string; // ID of the product in the cart
-    quantity: number;  // Number of items added
-    price: number;     // Price at the time of adding
-    name: string;      // Product name (to avoid extra Firestore reads)
-    image: string;     // Main product image
-    addedAt: string;   // Timestamp when added to cart
-  }
-  
+    export interface CartItem {
+      productId: string; // ID of the product in the cart
+      quantity: number;  // Number of items added
+      price: number;     // Price at the time of adding
+      name: string;      // Product name (to avoid extra Firestore reads)
+      image: string;     // Main product image
+      packageSize: string; // Selected package size
+      addedAt: string;   // Timestamp when added to cart
+    }
   
   export interface Order {
     id: string;         // Firestore-generated Order ID

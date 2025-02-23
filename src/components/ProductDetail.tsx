@@ -1,18 +1,20 @@
-
 import { useRouter } from "next/navigation";
 import { useQuantity } from "../app/hooks/useQuantity";
 import { useUserId } from "../app/hooks/useId";
 import api from "../app/utils/api"; 
 import { useState } from "react";
 
-
+interface PricingOption {
+  packageSize: string;
+  price: number;
+}
 
 interface Product {
   id: string;
   name: string;
-  price: number | string;
   category: string;
   description: string;
+  pricing: PricingOption[];
 }
 
 interface ProductDetailsProps {
@@ -22,11 +24,12 @@ interface ProductDetailsProps {
 export default function ProductDetails({ product }: ProductDetailsProps) {
   const { quantity, increaseQuantity, decreaseQuantity } = useQuantity();
   const [adding, setAdding] = useState(false);
+  const [selectedPrice, setSelectedPrice] = useState<PricingOption | null>(null);
   const userId = useUserId();
   const router = useRouter();
 
   const addToCart = async () => {
-    if (!product || quantity < 1) return;
+    if (!product || quantity < 1 || !selectedPrice) return;
     setAdding(true);
 
     try {
@@ -34,16 +37,17 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
         userId,
         productId: product.id,
         quantity,
+        packageSize: selectedPrice.packageSize,
+        price: selectedPrice.price,
       });
       alert(`✅ ${quantity} item(s) added to cart!`);
     } catch (err) {
-      if(!userId){
+      if (!userId) {
         alert("Please login to add products to cart");
         router.push("/auth");
-      }
-      else{
-      console.error("❌ Error adding to cart:", err);
-      alert("⚠️ Failed to add product to cart."); 
+      } else {
+        console.error("❌ Error adding to cart:", err);
+        alert("⚠️ Failed to add product to cart.");
       }
     } finally {
       setAdding(false);
@@ -57,7 +61,31 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
       <p className="text-md text-gray-600">Category: {product.category}</p>
 
       <div className="bg-white shadow-lg border p-6 rounded-lg mt-6 w-full md:w-3/4">
-        <p className="text-2xl font-bold">₹{product.price}</p>
+        <label htmlFor="packageSize" className="block text-sm font-medium text-gray-700">
+          Select Package Size
+        </label>
+        <select
+          id="packageSize"
+          name="packageSize"
+          className="border p-2 w-full rounded-md mb-4"
+          onChange={(e) => {
+            const selected = product.pricing.find(
+              (p) => p.packageSize === e.target.value
+            );
+            setSelectedPrice(selected || null);
+          }}
+        >
+          <option value="">Choose a size</option>
+          {product.pricing.map((option, index) => (
+            <option key={index} value={option.packageSize}>
+              {option.packageSize}
+            </option>
+          ))}
+        </select>
+        {selectedPrice && (
+          <p className="text-2xl font-bold">₹{selectedPrice.price}</p>
+        )}
+
         <p className="text-gray-600">Inclusive of all taxes</p>
 
         <div className="mt-4">

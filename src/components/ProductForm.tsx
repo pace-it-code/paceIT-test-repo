@@ -6,47 +6,43 @@ import axios, { AxiosError } from "axios";
 
 interface ProductFormData {
   name: string;
-  price: string;
   description: string;
   category: string;
-  stock: string;
-  images: File[];
   manufacturer: string;
   composition: string;
   commonlyUsedFor: string[];
   avoidForCrops: string[];
   benefits: string[];
   method: string;
-  doses: Dose[];
-}
-
-interface Dose {
-  quantity: string;
-  seedWeight: string;
-  price: number;
+  dosage: { dose: string; arce: string }[];
+  pricing: { packageSize: string; price: number }[];
+  images: File[];
 }
 
 export default function ProductForm() {
   const [formData, setFormData] = useState<ProductFormData>({
     name: "",
-    price: "",
     description: "",
     category: "",
-    stock: "",
-    images: [],
     manufacturer: "",
     composition: "",
     commonlyUsedFor: [],
     avoidForCrops: [],
     benefits: [],
     method: "",
-    doses: []
+    dosage: [],
+    pricing: [],
+    images: []
   });
 
-  const [dose, setDose] = useState<Dose>({
-    quantity: "",
-    seedWeight: "",
+  const [pricing, setPricing] = useState<{ packageSize: string; price: number }>({
+    packageSize: "",
     price: 0,
+  });
+
+  const [dose, setDose] = useState<{ dose: string; arce: string }>({
+    dose: "",
+    arce: "",
   });
 
   const [error, setError] = useState<string>("");
@@ -73,13 +69,22 @@ export default function ProductForm() {
     }
   };
 
+  const handlePricingChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setPricing({ ...pricing, [e.target.name]: e.target.value });
+  };
+
   const handleDoseChange = (e: ChangeEvent<HTMLInputElement>) => {
     setDose({ ...dose, [e.target.name]: e.target.value });
   };
 
+  const addPricing = () => {
+    setFormData({ ...formData, pricing: [...formData.pricing, pricing] });
+    setPricing({ packageSize: "", price: 0 });
+  };
+
   const addDose = () => {
-    setFormData({ ...formData, doses: [...formData.doses, dose] });
-    setDose({ quantity: "", seedWeight: "", price: 0 });
+    setFormData({ ...formData, dosage: [...formData.dosage, dose] });
+    setDose({ dose: "", arce: "" });
   };
 
   const handleSubmit = async (e: FormEvent) => {
@@ -87,35 +92,12 @@ export default function ProductForm() {
     setLoading(true);
     setError("");
 
-    // Check for missing required fields
-    const requiredFields = [
-      "name",
-      "description",
-      "category",
-      "stock",
-      "manufacturer",
-      "composition",
-      "method"
-    ];
-
-    const missingFields = requiredFields.filter(
-      (field) => !formData[field as keyof ProductFormData]
-    );
-
-    if (missingFields.length > 0) {
-      setError(`Missing required fields: ${missingFields.join(", ")}`);
-      setLoading(false);
-      return;
-    }
-
     try {
       const data = new FormData();
       Object.entries(formData).forEach(([key, value]) => {
         if (key === "images" && Array.isArray(value)) {
           value.forEach((image: File) => data.append("images", image));
-        } else if (key === "doses") {
-          data.append("doses", JSON.stringify(value));
-        } else if (Array.isArray(value)) {
+        } else if (Array.isArray(value) || typeof value === 'object') {
           data.append(key, JSON.stringify(value));
         } else {
           data.append(key, value as string);
@@ -131,10 +113,8 @@ export default function ProductForm() {
       router.push("/product");
     } catch (error: unknown) {
       if (error instanceof AxiosError) {
-        console.error("Axios Error:", error.response?.data || error.message);
         setError(error.response?.data?.message || "Failed to add product");
       } else {
-        console.error("Unknown Error:", error);
         setError("An unexpected error occurred.");
       }
     } finally {
@@ -142,13 +122,10 @@ export default function ProductForm() {
     }
   };
 
-
-
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
       {Object.keys(formData).map((field) =>
-        field !== "images" && field !== "doses" &&
-        field !== "commonlyUsedFor" && field !== "avoidForCrops" && field !== "benefits" ? (
+        field !== "images" && field !== "pricing" && field !== "dosage" ? (
           <input
             key={field}
             name={field}
@@ -157,51 +134,59 @@ export default function ProductForm() {
             className="border p-2"
             onChange={handleChange}
           />
-        ) : field === "images" ? (
-          <input
-            key={field}
-            type="file"
-            multiple
-            accept="image/*"
-            className="border p-2"
-            onChange={handleImageChange}
-          />
-        ) : (
-          <input
-            key={field}
-            name={field}
-            type="text"
-            placeholder={`${field} (comma separated)`}
-            className="border p-2"
-            onChange={handleArrayChange}
-          />
-        )
+        ) : null
       )}
+
+      <input
+        type="file"
+        multiple
+        accept="image/*"
+        className="border p-2"
+        onChange={handleImageChange}
+      />
 
       <div className="flex gap-2">
         <input
-          name="quantity"
+          name="packageSize"
           type="text"
-          placeholder="Quantity"
+          placeholder="Package Size"
           className="border p-2"
-          onChange={handleDoseChange}
-          value={dose.quantity}
-        />
-        <input
-          name="seedWeight"
-          type="text"
-          placeholder="Seed Weight"
-          className="border p-2"
-          onChange={handleDoseChange}
-          value={dose.seedWeight}
+          onChange={handlePricingChange}
+          value={pricing.packageSize}
         />
         <input
           name="price"
           type="number"
           placeholder="Price"
           className="border p-2"
+          onChange={handlePricingChange}
+          value={pricing.price}
+        />
+        <button
+          type="button"
+          className="btn bg-blue-500 text-white p-2 rounded"
+          onClick={addPricing}
+        >
+          Add Pricing
+        </button>
+      </div>
+
+      <div className="flex gap-2">
+        <input
+          name="dose"
+          type="text"
+          placeholder="Dose"
+          className="border p-2"
           onChange={handleDoseChange}
-          value={dose.price}
+          value={dose.dose}
+        />
+        <input
+          name="arce"
+          type="text"
+          placeholder="Arce"
+          className="border p-2"
+          onChange={handleDoseChange}
+          value={dose.arce}
         />
         <button
           type="button"

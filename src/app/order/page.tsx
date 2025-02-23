@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useCart } from "../hooks/useCart";
 import { useUserId } from "../hooks/useId";
+import { CartItem } from "../hooks/useCart";
+import Image from "next/image";
 
 interface Address {
   id: string; 
@@ -32,7 +34,7 @@ export default function ConfirmOrderPage() {
           setAddress(data.data[0]); // Automatically select the first address
         } else {
           alert("No address found. Please add an address before placing an order.");
-          router.push("/address"); // Redirect to address page if no address is found
+          router.push("/address");
         }
       } catch (err) {
         console.error("Error fetching address:", err);
@@ -47,9 +49,10 @@ export default function ConfirmOrderPage() {
     const response = await api.post("/order", {
         userId,
         addressId: address.id,
+        cartItems: cart,
     });
     
-        const data = response.data;
+    const data = response.data;
 
     if (data?.success) {
       alert("Order placed successfully!");
@@ -76,9 +79,23 @@ export default function ConfirmOrderPage() {
       </div>
 
       <h2 className="text-xl font-semibold mb-2">Cart Summary:</h2>
-      {cart.map((item) => (
-        <div key={item.productId} className="p-2 border rounded mb-2">
-          {item.name} - Quantity: {item.quantity} - Price: ${30}
+      {cart.map((item: CartItem) => (
+        <div key={item.productId} className="p-2 border rounded mb-2 flex items-center gap-4">
+          <div className="w-20 h-20 relative">
+            <Image
+              src={item.image ?? "/placeholder.png"}
+              alt={item.name ?? "Unnamed Product"}
+              fill
+              className="object-cover rounded-md"
+            />
+          </div>
+          <div>
+            <p className="font-semibold">{item.name}</p>
+            <p>Size: {item.packageSize}</p>
+            <p>Quantity: {item.quantity}</p>
+            <p>Price: ₹{item.price}</p>
+            <p className="text-xs text-gray-500">Added at: {new Date(item.addedAt).toLocaleString()}</p>
+          </div>
         </div>
       ))}
 
