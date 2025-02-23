@@ -78,7 +78,7 @@ export default function ConfirmOrderPage() {
       <h2 className="text-xl font-semibold mb-2">Cart Summary:</h2>
       {cart.map((item) => (
         <div key={item.productId} className="p-2 border rounded mb-2">
-          {item.name} - Quantity: {item.quantity} - Price: ${item.price}
+          {item.name} - Quantity: {item.quantity} - Price: ${30}
         </div>
       ))}
 
