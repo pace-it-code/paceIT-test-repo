@@ -7,7 +7,7 @@ import Image from "next/image";
 
 export default function ProductBanner() {
   return (
-    <div className="w-full max-w-4xl mt-4 mb-4">
+    <div className="w-full max-w-4xl mt-7 mb-4">
       <Swiper
         modules={[Pagination, Autoplay]}
         slidesPerView={1}

@@ -31,9 +31,8 @@ export default async function ProductList() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-2 flex flex-col items-center mt-28 md:mt-36 bg-cream">
-      <h1 className="text-6xl font-bold text-greens text-center">Welcome to Our Store</h1>
-      <p className="text-lg text-darkgray mt-2">Find the best deals on high-quality products.</p>
+    <div className="container mx-auto px-4 py-2 flex flex-col items-center mt-28 md:mt-12  bg-cream">
+   
 
 
       <ProductBanner />
