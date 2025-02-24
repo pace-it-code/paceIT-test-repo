@@ -1,20 +1,21 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useState } from "react";
+import {Product} from "../../types/types"
 
 interface PricingOption {
   packageSize: string;
   price: number;
 }
 
-interface Product {
-  id: string;
-  name: string;
-  description: string;
-  category: string;
-  pricing?: PricingOption[]; // Made optional with ? to avoid undefined errors
-  images?: string[];
-}
+// interface Product {
+//   id: string;
+//   name: string;
+//   description: string;
+//   category: string;
+//   pricing?: PricingOption[]; // Made optional with ? to avoid undefined errors
+//   images?: string[];
+// }
 
 export default function ProductCard({ product }: { product: Product }) {
   const [selectedPrice, setSelectedPrice] = useState<PricingOption | null>(null);
