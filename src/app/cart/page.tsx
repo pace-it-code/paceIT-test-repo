@@ -52,7 +52,7 @@ export default function CartPage() {
                 className="p-4 border rounded-lg shadow-md flex items-center justify-between"
               >
                 <Image
-                  src={item.images?.[0] ?? "/images.png"}
+                  src={item.image.[0] ?? "/images.png"}
                   alt={item.name}
                   width={80}
                   height={80}
