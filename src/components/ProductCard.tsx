@@ -8,14 +8,7 @@ interface PricingOption {
   price: number;
 }
 
-// interface Product {
-//   id: string;
-//   name: string;
-//   description: string;
-//   category: string;
-//   pricing?: PricingOption[]; // Made optional with ? to avoid undefined errors
-//   images?: string[];
-// }
+
 
 export default function ProductCard({ product }: { product: Product }) {
   const [selectedPrice, setSelectedPrice] = useState<PricingOption | null>(null);

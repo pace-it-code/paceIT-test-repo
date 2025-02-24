@@ -19,10 +19,18 @@ export default async function ProductList() {
     if (!res.ok) throw new Error("Failed to fetch products");
 
     const data = await res.json();
+
     products = data.data.map((product: Product) => ({
       id: product.id,
       name: product.name,
-      price: typeof product.price === "number" ? product.price : 0,
+      description: product.description || "No description available",
+      category: product.category || "Uncategorized",
+      pricing: Array.isArray(product.pricing)
+        ? product.pricing.map((p) => ({
+            packageSize: p.packageSize || "Default",
+            price: typeof p.price === "string" ? p.price : 0,
+          }))
+        : [],
       images: product.images?.length ? product.images : ["/images/sample-product.jpg"],
     }));
   } catch (err) {
@@ -31,14 +39,9 @@ export default async function ProductList() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-2 flex flex-col items-center mt-28 md:mt-12  bg-cream">
-   
-
-
+    <div className="container mx-auto px-4 py-2 flex flex-col items-center mt-28 md:mt-12 bg-cream">
       <ProductBanner />
-
       <Categories />
-
 
       {error ? (
         <p className="text-center text-red-500 text-lg mt-4">❌ {error}</p>

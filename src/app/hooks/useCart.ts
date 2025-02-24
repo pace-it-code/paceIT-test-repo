@@ -5,8 +5,9 @@ import api from "../utils/api";
   productId: string; // ID of the product in the cart
   quantity: number;  // Number of items added
   price: number;     // Price at the time of adding
-  name: string;      // Product name (to avoid extra Firestore reads)
-  image: string;     // Main product image
+  name: string; 
+  image: string[]| string ;  // Product name (to avoid extra Firestore reads)
+  images: string[];     // Main product image
   packageSize: string; // Selected package size
   addedAt: string;   // Timestamp when added to cart
 }

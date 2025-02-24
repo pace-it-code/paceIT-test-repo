@@ -21,7 +21,6 @@ export default function ConfirmOrderPage() {
   const router = useRouter();
   const userId = useUserId();
   const { cart, loading, error } = useCart(userId);
-
   const [address, setAddress] = useState<Address | null>(null);
 
   useEffect(() => {
@@ -47,13 +46,12 @@ export default function ConfirmOrderPage() {
     if (!userId || !address) return;
 
     const response = await api.post("/order", {
-        userId,
-        addressId: address.id,
-        cartItems: cart,
+      userId,
+      addressId: address.id,
+      cartItems: cart,
     });
     
     const data = response.data;
-
     if (data?.success) {
       alert("Order placed successfully!");
       router.push("/order");
@@ -62,49 +60,98 @@ export default function ConfirmOrderPage() {
     }
   };
 
-  if (loading) return <p>Loading cart...</p>;
-  if (error) return <p>Error loading cart: {error}</p>;
-  if (!address) return <p>Loading address...</p>;
-
+  if (loading) return <p className="text-center text-lg py-10">Loading cart...</p>;
+  if (error) return <p className="text-center text-red-500 py-10">Error loading cart: {error}</p>;
+  if (!address) return <p className="text-center text-lg py-10">Loading address...</p>;
+  
   return (
-    <div className="container mx-auto px-4 py-6">
-      <h1 className="text-3xl font-bold mb-4">🧾 Confirm Your Order</h1>
-
-      <h2 className="text-xl font-semibold mb-2">Delivery Address:</h2>
-      <div className="p-4 border rounded-lg mb-4">
-        <p>{address.line1}</p>
-        {address.line2 && <p>{address.line2}</p>}
-        <p>{address.city}, {address.state}, {address.zip}</p>
-        <p>📞 {address.phone}</p>
-      </div>
-
-      <h2 className="text-xl font-semibold mb-2">Cart Summary:</h2>
-      {cart.map((item: CartItem) => (
-        <div key={item.productId} className="p-2 border rounded mb-2 flex items-center gap-4">
-          <div className="w-20 h-20 relative">
-            <Image
-              src={item.image ?? "/placeholder.png"}
-              alt={item.name ?? "Unnamed Product"}
-              fill
-              className="object-cover rounded-md"
-            />
+    <div className="min-h-screen bg-gradient-to-r from-indigo-50 to-white py-12">
+      <div className="max-w-5xl mx-auto bg-white rounded-xl shadow-lg p-8">
+        <h1 className="text-4xl font-bold text-center text-gray-800 mb-8">
+          Confirm Your Order
+        </h1>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          {/* Delivery Address Card */}
+          <div className="border p-6 rounded-lg shadow-sm">
+            <h2 className="text-2xl font-semibold text-gray-700 mb-4">
+              Delivery Address
+            </h2>
+            <div className="space-y-2 text-gray-600">
+              <p>{address.line1}</p>
+              {address.line2 && <p>{address.line2}</p>}
+              <p>
+                {address.city}, {address.state} {address.zip}
+              </p>
+              <p className="flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2v-5a2 2 0 00-2-2H5a2 2 0 00-2 2v5a2 2 0 002 2z" />
+                </svg>
+                {address.phone}
+              </p>
+            </div>
           </div>
-          <div>
-            <p className="font-semibold">{item.name}</p>
-            <p>Size: {item.packageSize}</p>
-            <p>Quantity: {item.quantity}</p>
-            <p>Price: ₹{item.price}</p>
-            <p className="text-xs text-gray-500">Added at: {new Date(item.addedAt).toLocaleString()}</p>
+          {/* Cart Summary Card */}
+          <div className="border p-6 rounded-lg shadow-sm">
+            <h2 className="text-2xl font-semibold text-gray-700 mb-4">
+              Cart Summary
+            </h2>
+            <div className="space-y-4 max-h-96 overflow-y-auto">
+              {cart.map((item: CartItem) => {
+                const imageUrl =
+                  (Array.isArray(item.images) ? item.images[0] : item.images) ||
+                  (Array.isArray(item.images) ? item.images[0] : item.images) ||
+                  "/images.png";
+
+                return (
+                  <div key={item.productId} className="flex items-center gap-4 p-4 border rounded-lg">
+                    <div className="relative w-20 h-20 flex-shrink-0">
+                      <Image
+                        src={imageUrl}
+                        alt={item.name ?? "Unnamed Product"}
+                        fill
+                        className="object-cover rounded-md"
+                      />
+                    </div>
+                    <div className="flex-grow">
+                      <p className="font-semibold text-lg text-gray-800">{item.name}</p>
+                      {item.packageSize && (
+                        <p className="text-sm text-gray-500">Size: {item.packageSize}</p>
+                      )}
+                      <p className="text-sm text-gray-600">Quantity: {item.quantity}</p>
+                      <p className="text-sm text-gray-600">Price: ₹{item.price}</p>
+                      <p className="text-xs text-gray-400">
+                        Added at: {new Date(item.addedAt).toLocaleString()}
+                      </p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            <div className="mt-4 border-t pt-4">
+              <div className="flex justify-between items-center">
+                <p className="text-lg font-medium text-gray-700">
+                  Total Items: {cart.length}
+                </p>
+                <p className="text-lg font-bold text-indigo-600">
+                  ₹
+                  {cart.reduce(
+                    (acc, item) => acc + item.price * item.quantity,
+                    0
+                  )}
+                </p>
+              </div>
+            </div>
           </div>
         </div>
-      ))}
-
-      <button
-        onClick={handlePlaceOrder}
-        className="bg-green-500 text-white px-6 py-3 rounded-lg mt-4"
-      >
-        ✅ Place Order
-      </button>
+        <div className="mt-8 text-center">
+          <button
+            onClick={handlePlaceOrder}
+            className="bg-green-500 hover:bg-green-600 transition-colors text-white px-8 py-4 rounded-full text-xl font-semibold shadow-lg"
+          >
+            ✅ Place Order
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

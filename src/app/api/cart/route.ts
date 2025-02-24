@@ -44,7 +44,10 @@ export async function PUT(req: NextRequest) {
     const userData = userSnap.data();
     const cart = userData.cart || [];
 
-    const existingItemIndex = cart.findIndex((item: CartItem) => item.productId === productId);
+    const existingItemIndex = cart.findIndex(
+      (item: CartItem) => item.productId === productId && item.packageSize === packageSize
+    );
+    
 
     if (existingItemIndex !== -1) {
       cart[existingItemIndex] = updatedCartItem;
