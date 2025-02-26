@@ -1,4 +1,5 @@
 "use client";
+
 import { v4 as uuidv4 } from 'uuid';
 import api from "../utils/api";
 import { useEffect, useState } from "react";
@@ -7,6 +8,7 @@ import { useCart } from "../hooks/useCart";
 import { useUserId } from "../hooks/useId";
 import { CartItem } from "../hooks/useCart";
 import Image from "next/image";
+import Script from "next/script";
 
 interface Address {
   id: string; 
@@ -46,19 +48,69 @@ export default function ConfirmOrderPage() {
   const handlePlaceOrder = async () => {
     if (!userId || !address) return;
 
-    const response = await api.post("/order", {
-      userId,
-      addressId: address.id,
-      cartItems: cart,
+    // Calculate the total amount from cart items
+    const totalAmount = cart.reduce((acc, item) => acc + item.price * item.quantity, 0);
+
+    // Create a Razorpay order on your backend
+    const res = await fetch("/api/createOrder", {
+      method: "POST",
+      body: JSON.stringify({ amount: totalAmount * 100 }), // converting to smallest currency unit
     });
-    
-    const data = response.data;
-    if (data?.success) {
-      alert("Order placed successfully!");
-      router.push("/order");
-    } else {
-      alert("Failed to place order.");
+    const data = await res.json();
+
+    if (!data || !data.id) {
+      alert("Failed to create payment order.");
+      return;
     }
+
+    const paymentData = {
+      key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+      order_id: data.id,
+      amount: totalAmount * 100,
+      currency: "INR",
+      name: "Your Store Name",
+      description: "Order Payment",
+      prefill: {
+        // Prefill customer details using the address info
+        contact: address.phone,
+      },
+      theme: {
+        color: "#3399cc",
+      },
+      handler: async function (response: any) {
+        // Verify payment on your backend
+        const verifyRes = await fetch("/api/verifyOrder", {
+          method: "POST",
+          body: JSON.stringify({
+            orderId: response.razorpay_order_id,
+            razorpayPaymentId: response.razorpay_payment_id,
+            razorpaySignature: response.razorpay_signature,
+          }),
+        });
+        const verifyData = await verifyRes.json();
+
+        if (verifyData.isOk) {
+          // Payment successful, now place the order in your backend
+          const orderResponse = await api.post("/order", {
+            userId,
+            addressId: address.id,
+            cartItems: cart,
+          });
+          const orderData = orderResponse.data;
+          if (orderData?.success) {
+            alert("Order placed successfully!");
+            router.push("/order");
+          } else {
+            alert("Failed to place order.");
+          }
+        } else {
+          alert("Payment verification failed.");
+        }
+      },
+    };
+
+    const payment = new (window as any).Razorpay(paymentData);
+    payment.open();
   };
 
   if (loading) return <p className="text-center text-lg py-10">Loading cart...</p>;
@@ -67,6 +119,10 @@ export default function ConfirmOrderPage() {
   
   return (
     <div className="min-h-screen bg-gradient-to-r from-indigo-50 to-white py-12">
+      <Script
+        type="text/javascript"
+        src="https://checkout.razorpay.com/v1/checkout.js"
+      />
       <div className="max-w-5xl mx-auto bg-white rounded-xl shadow-lg p-8">
         <h1 className="text-4xl font-bold text-center text-gray-800 mb-8">
           Confirm Your Order
@@ -99,7 +155,6 @@ export default function ConfirmOrderPage() {
             <div className="space-y-4 max-h-96 overflow-y-auto">
               {cart.map((item: CartItem) => {
                 const imageUrl =
-                  (Array.isArray(item.images) ? item.images[0] : item.images) ||
                   (Array.isArray(item.images) ? item.images[0] : item.images) ||
                   "/images.png";
 
