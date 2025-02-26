@@ -1,5 +1,5 @@
 "use client";
-
+import { v4 as uuidv4 } from 'uuid';
 import { useEffect, useState, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
@@ -177,7 +177,7 @@ export default function CartPage() {
                 "/images.png";
               return (
                 <div
-                  key={item.productId}
+                  key={uuidv4()}
                   className="flex items-center justify-between p-4 border rounded-lg shadow-md mb-4"
                 >
                   <div className="flex items-center gap-4">

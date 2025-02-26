@@ -1,4 +1,5 @@
 "use client";
+import { v4 as uuidv4 } from 'uuid';
 import api from "../utils/api";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -103,7 +104,7 @@ export default function ConfirmOrderPage() {
                   "/images.png";
 
                 return (
-                  <div key={item.productId} className="flex items-center gap-4 p-4 border rounded-lg">
+                  <div key={uuidv4()} className="flex items-center gap-4 p-4 border rounded-lg">
                     <div className="relative w-20 h-20 flex-shrink-0">
                       <Image
                         src={imageUrl}
