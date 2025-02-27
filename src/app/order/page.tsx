@@ -53,65 +53,76 @@ export default function ConfirmOrderPage() {
 
     // Create a Razorpay order on your backend
     const res = await fetch("/api/createOrder", {
-      method: "POST",
-      body: JSON.stringify({ amount: totalAmount * 100 }), // converting to smallest currency unit
+        method: "POST",
+        body: JSON.stringify({ amount: totalAmount * 100 }), // converting to smallest currency unit
     });
     const data = await res.json();
 
     if (!data || !data.id) {
-      alert("Failed to create payment order.");
-      return;
+        alert("Failed to create payment order.");
+        return;
     }
 
     const paymentData = {
-      key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
-      order_id: data.id,
-      amount: totalAmount * 100,
-      currency: "INR",
-      name: "Your Store Name",
-      description: "Order Payment",
-      prefill: {
-        // Prefill customer details using the address info
-        contact: address.phone,
-      },
-      theme: {
-        color: "#3399cc",
-      },
-      handler: async function (response: any) {
-        // Verify payment on your backend
-        const verifyRes = await fetch("/api/verifyOrder", {
-          method: "POST",
-          body: JSON.stringify({
-            orderId: response.razorpay_order_id,
-            razorpayPaymentId: response.razorpay_payment_id,
-            razorpaySignature: response.razorpay_signature,
-          }),
-        });
-        const verifyData = await verifyRes.json();
+        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+        order_id: data.id,
+        amount: totalAmount * 100,
+        currency: "INR",
+        name: "Your Store Name",
+        description: "Order Payment",
+        prefill: {
+            contact: address.phone,
+        },
+        theme: {
+            color: "#3399cc",
+        },
+        handler: async function (response: any) {
+            const verifyRes = await fetch("/api/verifyOrder", {
+                method: "POST",
+                body: JSON.stringify({
+                    orderId: response.razorpay_order_id,
+                    razorpayPaymentId: response.razorpay_payment_id,
+                    razorpaySignature: response.razorpay_signature,
+                }),
+            });
+            const verifyData = await verifyRes.json();
 
-        if (verifyData.isOk) {
-          // Payment successful, now place the order in your backend
-          const orderResponse = await api.post("/order", {
-            userId,
-            addressId: address.id,
-            cartItems: cart,
-          });
-          const orderData = orderResponse.data;
-          if (orderData?.success) {
-            alert("Order placed successfully!");
-            router.push("/order");
-          } else {
-            alert("Failed to place order.");
-          }
-        } else {
-          alert("Payment verification failed.");
-        }
-      },
+            if (verifyData.isOk) {
+                try {
+                    const shiprocketResponse = await fetch("/api/ship", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({ userId }),
+                    });
+
+                    const shiprocketData = await shiprocketResponse.json();
+                    if (shiprocketData.success) {
+                        const createdOrderId = shiprocketData?.data?.order_id;
+                        alert("Order placed successfully in Shiprocket!");
+
+                        // Redirect to the Order Confirmation Page with the Order ID
+                        if (createdOrderId) {
+                            router.push(`/order-confirmation?orderId=${createdOrderId}`);
+                        }
+                    } else {
+                        console.error("Shiprocket Order Error:", shiprocketData.error);
+                        alert("Failed to create order in Shiprocket. Please try again.");
+                    }
+                } catch (error) {
+                    console.error("Shiprocket API Call Error:", error);
+                    alert("Error occurred while communicating with Shiprocket.");
+                }
+            } else {
+                alert("Payment verification failed.");
+            }
+        },
     };
 
     const payment = new (window as any).Razorpay(paymentData);
     payment.open();
-  };
+};
 
   if (loading) return <p className="text-center text-lg py-10">Loading cart...</p>;
   if (error) return <p className="text-center text-red-500 py-10">Error loading cart: {error}</p>;
