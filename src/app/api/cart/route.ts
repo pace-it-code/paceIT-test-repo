@@ -34,7 +34,7 @@ export async function PUT(req: NextRequest) {
     const updatedCartItem: CartItem = {
       productId,
       quantity: Number(quantity),
-      price: selectedPackage?.price ?? 0,
+      price: Number(selectedPackage?.price) ?? 0,
       name: productData.name ?? "Unnamed Product",
       image: productData.images?.[0] ?? "/placeholder.png",
       packageSize: selectedPackage?.packageSize ?? "Default Size",
