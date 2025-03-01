@@ -1,6 +1,6 @@
 import ProductGrid from "../components/ProductGrid";
 //import ProductBanner from "../components/ProductBanner";
-import FeaturesSection from "../components/FeatureSection";
+// import FeaturesSection from "../components/FeatureSection";
 import Testimonials from "../components/Testimonials";
 import { Product } from "../../types/types";
 // import Categories from "@/components/Categories"; // ❌ Removed since we don't need the second navbar

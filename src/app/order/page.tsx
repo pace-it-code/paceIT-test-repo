@@ -9,6 +9,7 @@ import { useUserId } from "../hooks/useId";
 import { CartItem } from "../hooks/useCart";
 import Image from "next/image";
 import Script from "next/script";
+import axios from 'axios';
 
 interface Address {
   id: string; 
@@ -19,21 +20,59 @@ interface Address {
   zip: string;
   phone: string;
 }
+declare global {
+  interface Window {
+    Razorpay: new (options: RazorpayOptions) => RazorpayInstance;
+  }
+}
+
+interface RazorpayOptions {
+  key: string;
+  order_id: string;
+  amount: number;
+  currency: string;
+  name: string;
+  description: string;
+  prefill: { contact: string };
+  theme: { color: string };
+  handler: (response: RazorpayResponse) => void;
+}
+
+interface RazorpayResponse {
+  razorpay_order_id: string;
+  razorpay_payment_id: string;
+  razorpay_signature: string;
+}
+interface RazorpayInstance {
+  open: () => void;
+}
+
+interface PaymentOrderResponse {
+  id: string;
+}
+
 
 export default function ConfirmOrderPage() {
   const router = useRouter();
   const userId = useUserId();
   const { cart, loading, error } = useCart(userId);
   const [address, setAddress] = useState<Address | null>(null);
+  const razorpayKey = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
+
+if (!razorpayKey) {
+  throw new Error("Razorpay key is missing. Please set NEXT_PUBLIC_RAZORPAY_KEY_ID in environment variables.");
+}
+
 
   useEffect(() => {
     const fetchAddress = async () => {
       if (!userId) return;
       try {
-        const res = await api.get(`/address?userId=${userId}`);
-        const data = res.data;
-        if (data?.success && Array.isArray(data.data) && data.data.length > 0) {
-          setAddress(data.data[0]); // Automatically select the first address
+        const res = await api.get<{ success: boolean; data: Address[] }>(
+          `/address?userId=${userId}`
+        );
+        if (res.data.success && res.data.data.length > 0) {
+          setAddress(res.data.data[0]);
         } else {
           alert("No address found. Please add an address before placing an order.");
           router.push("/address");
@@ -48,81 +87,69 @@ export default function ConfirmOrderPage() {
   const handlePlaceOrder = async () => {
     if (!userId || !address) return;
 
-    // Calculate the total amount from cart items
     const totalAmount = cart.reduce((acc, item) => acc + item.price * item.quantity, 0);
 
-    // Create a Razorpay order on your backend
-    const res = await fetch("/api/createOrder", {
-        method: "POST",
-        body: JSON.stringify({ amount: totalAmount * 100 }), // converting to smallest currency unit
-    });
-    const data = await res.json();
-
-    if (!data || !data.id) {
+    try {
+      const res = await axios.post<PaymentOrderResponse>("/api/createOrder", {
+        amount: totalAmount * 100,
+      });
+      const data = res.data;
+      if (!data || !data.id) {
         alert("Failed to create payment order.");
         return;
-    }
+      }
 
-    const paymentData = {
-        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+      const paymentData = {
+        key: razorpayKey,
         order_id: data.id,
         amount: totalAmount * 100,
         currency: "INR",
         name: "Your Store Name",
         description: "Order Payment",
-        prefill: {
-            contact: address.phone,
-        },
-        theme: {
-            color: "#3399cc",
-        },
-        handler: async function (response: any) {
-            const verifyRes = await fetch("/api/verifyOrder", {
-                method: "POST",
-                body: JSON.stringify({
-                    orderId: response.razorpay_order_id,
-                    razorpayPaymentId: response.razorpay_payment_id,
-                    razorpaySignature: response.razorpay_signature,
-                }),
+        prefill: { contact: address.phone },
+        theme: { color: "#3399cc" },
+        handler: async (response: RazorpayResponse) => {
+          try {
+            const verifyRes = await axios.post<{ isOk: boolean }>("/api/verifyOrder", {
+              orderId: response.razorpay_order_id,
+              razorpayPaymentId: response.razorpay_payment_id,
+              razorpaySignature: response.razorpay_signature,
             });
-            const verifyData = await verifyRes.json();
 
-            if (verifyData.isOk) {
-                try {
-                    const shiprocketResponse = await fetch("/api/ship", {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                        },
-                        body: JSON.stringify({ userId }),
-                    });
+            if (verifyRes.data.isOk) {
+              const shiprocketResponse = await axios.post<{ success: boolean; data?: { order_id?: string }; error?: string }>(
+                "/api/ship",
+                { userId },
+                { headers: { "Content-Type": "application/json" } }
+              );
 
-                    const shiprocketData = await shiprocketResponse.json();
-                    if (shiprocketData.success) {
-                        const createdOrderId = shiprocketData?.data?.order_id;
-                        alert("Order placed successfully in Shiprocket!");
-
-                        // Redirect to the Order Confirmation Page with the Order ID
-                        if (createdOrderId) {
-                            router.push(`/order-confirmation?orderId=${createdOrderId}`);
-                        }
-                    } else {
-                        console.error("Shiprocket Order Error:", shiprocketData.error);
-                        alert("Failed to create order in Shiprocket. Please try again.");
-                    }
-                } catch (error) {
-                    console.error("Shiprocket API Call Error:", error);
-                    alert("Error occurred while communicating with Shiprocket.");
+              if (shiprocketResponse.data.success) {
+                const createdOrderId = shiprocketResponse.data.data?.order_id;
+                alert("Order placed successfully in Shiprocket!");
+                if (createdOrderId) {
+                  router.push(`/order-confirmation?orderId=${createdOrderId}`);
                 }
+              } else {
+                console.error("Shiprocket Order Error:", shiprocketResponse.data.error);
+                alert("Failed to create order in Shiprocket. Please try again.");
+              }
             } else {
-                alert("Payment verification failed.");
+              alert("Payment verification failed.");
             }
+          } catch (error) {
+            console.error("Error handling payment verification:", error);
+            alert("Error occurred while processing payment verification.");
+          }
         },
-    };
+      };
 
-    const payment = new (window as any).Razorpay(paymentData);
-    payment.open();
-};
+      const payment = new (window).Razorpay(paymentData);
+      payment.open();
+    } catch (error) {
+      console.error("Error creating order:", error);
+      alert("Error occurred while creating order.");
+    }
+  };
 
   if (loading) return <p className="text-center text-lg py-10">Loading cart...</p>;
   if (error) return <p className="text-center text-red-500 py-10">Error loading cart: {error}</p>;

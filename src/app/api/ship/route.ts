@@ -5,13 +5,35 @@ import { NextResponse } from "next/server";
 
 const SHIPROCKET_API_BASE = "https://apiv2.shiprocket.in/v1/external";
 
+interface CartItem {
+    name: string;
+    productId?: string;
+    quantity: number;
+    price: number;
+}
+
+interface Address {
+    line1: string;
+    line2?: string;
+    city: string;
+    zip: string;
+    state: string;
+    country: string;
+    phone: string;
+}
+
+interface UserData {
+    address?: Address[];
+    cart?: CartItem[];
+}
+
 // POST method to handle Shiprocket order creation
 export async function POST(request: Request) {
     console.log("API call initiated: /api/ship");
 
     try {
         const body = await request.json();
-        const { userId } = body;
+        const { userId }: { userId: string } = body;
 
         console.log("Received Request Body:", body);
 
@@ -36,7 +58,7 @@ export async function POST(request: Request) {
             );
         }
 
-        const userData = userSnap.data();
+        const userData = userSnap.data() as UserData;
         const addresses = userData?.address || [];
         const cartItems = userData?.cart || [];
 
@@ -62,7 +84,6 @@ export async function POST(request: Request) {
             );
         }
 
-        // Shiprocket token from your environment or provided directly
         const token = process.env.SHIPROCKET_API_TOKEN;
 
         if (!token) {
@@ -76,20 +97,20 @@ export async function POST(request: Request) {
         console.log("Shiprocket API Token acquired.");
 
         // Prepare the order data for Shiprocket
-        const orderItems = cartItems.map((item: any) => ({
+        const orderItems = cartItems.map((item: CartItem) => ({
             name: item.name,
             sku: item.productId || "SKU123",
-            units: parseInt(item.quantity, 10),
-            selling_price: parseFloat(item.price) || 0,
+            units: item.quantity,
+            selling_price: item.price,
             discount: 0,
             tax: 0,
-            hsn: 44122
+            hsn: 44122,
         }));
 
         const orderData = {
             order_id: `ORDER_${userId}_${Date.now()}`,
             order_date: new Date().toISOString().slice(0, 10),
-            pickup_location: "home", // Valid pickup location
+            pickup_location: "home",
             billing_customer_name: "John Doe",
             billing_last_name: "Doe",
             billing_address: address.line1,
@@ -107,11 +128,11 @@ export async function POST(request: Request) {
             giftwrap_charges: 0,
             transaction_charges: 0,
             total_discount: 0,
-            sub_total: cartItems.reduce((acc: number, item: any) => acc + parseFloat(item.price) * item.quantity, 0),
+            sub_total: cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0),
             length: 10.0,
             breadth: 15.0,
             height: 20.0,
-            weight: 1.0
+            weight: 1.0,
         };
 
         console.log("Prepared Order Data:", JSON.stringify(orderData, null, 2));
@@ -131,9 +152,9 @@ export async function POST(request: Request) {
         console.log("Shiprocket API Response:", response.data);
 
         return NextResponse.json({ success: true, data: response.data });
-    } catch (error: any) {
-        console.error("Shiprocket Order Error:", error.message);
-        if (error.response) {
+    } catch (error: unknown) {
+        console.error("Shiprocket Order Error:", error);
+        if (axios.isAxiosError(error) && error.response) {
             console.error("Error Response Data:", error.response.data);
             return NextResponse.json(
                 { success: false, error: error.response.data.message || "Failed to create Shiprocket order." },
@@ -149,5 +170,8 @@ export async function POST(request: Request) {
 
 // GET method to handle unsupported requests
 export async function GET() {
-    return NextResponse.json({ success: false, error: "GET method not allowed" }, { status: 405 });
+    return NextResponse.json(
+        { success: false, error: "GET method not allowed" },
+        { status: 405 }
+    );
 }

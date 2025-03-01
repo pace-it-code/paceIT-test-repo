@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '../../../../utils/firebase';
-import { getDoc, doc, updateDoc, collection } from 'firebase/firestore';
+import { getDoc, doc, updateDoc } from 'firebase/firestore';
 import { CartItem } from '../../../../types/types';
 import { User } from '../../../../types/types';
 

@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Image from "next/image";
 
 /**
  * This component can safely use onClick handlers
@@ -18,7 +19,7 @@ export default function ShopByCategory() {
               className="rounded-full w-24 h-24 mx-auto mb-2.5 object-cover"
               onClick={() => alert("Category 1 clicked")}
             >
-              <img src="../cat.png" alt="Category 1" />
+              <Image src="/cat.png" alt="Category 1" width={96} height={96} className="rounded-full object-cover" />
             </button>
             <p className="font-medium">Agriculture</p>
           </div>
@@ -29,7 +30,7 @@ export default function ShopByCategory() {
               className="rounded-full w-24 h-24 mx-auto mb-2.5 object-cover"
               onClick={() => alert("Category 2 clicked")}
             >
-              <img src="/cat.png" alt="Category 2" />
+              <Image src="/cat.png" alt="Category 2" width={96} height={96} className="rounded-full object-cover" />
             </button>
             <p className="font-medium">Organic</p>
           </div>
@@ -40,7 +41,7 @@ export default function ShopByCategory() {
               className="rounded-full w-24 h-24 mx-auto mb-2.5 object-cover"
               onClick={() => alert("Category 3 clicked")}
             >
-              <img src="/cat.png" alt="Category 3" />
+              <Image src="/cat.png" alt="Category 3" width={96} height={96} className="rounded-full object-cover" />
             </button>
             <p className="font-medium">Vegetables</p>
           </div>
@@ -51,7 +52,7 @@ export default function ShopByCategory() {
               className="rounded-full w-24 h-24 mx-auto mb-2.5 object-cover"
               onClick={() => alert("Category 4 clicked")}
             >
-              <img src="/cat.png" alt="Category 4" />
+              <Image src="/cat.png" alt="Category 4" width={96} height={96} className="rounded-full object-cover" />
             </button>
             <p className="font-medium">Fruits</p>
           </div>

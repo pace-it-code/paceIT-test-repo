@@ -47,6 +47,7 @@ export default function CartPage() {
       latestCartRef.current = res.data.cart;
     } catch (err) {
       setError("Failed to load cart");
+      console.log(err)
     } finally {
       isFetchingRef.current = false;
       setLoading(false);

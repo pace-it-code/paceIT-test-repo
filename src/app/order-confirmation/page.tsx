@@ -1,9 +1,12 @@
 "use client";
 
-import { useSearchParams, useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { Suspense } from "react";
 
-export default function OrderConfirmationPage() {
+export const dynamic = "force-dynamic"; // Ensure dynamic rendering
+
+function OrderConfirmationContent() {
     const searchParams = useSearchParams();
     const orderId = searchParams.get("orderId");
 
@@ -32,5 +35,13 @@ export default function OrderConfirmationPage() {
                 </Link>
             </div>
         </div>
+    );
+}
+
+export default function OrderConfirmationPage() {
+    return (
+        <Suspense fallback={<p className="text-center py-10">Loading...</p>}>
+            <OrderConfirmationContent />
+        </Suspense>
     );
 }
