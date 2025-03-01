@@ -3,12 +3,18 @@ import Image from "next/image";
 import { useState, useEffect, useMemo } from "react";
 import { Product } from "../../types/types";
 
-interface PricingOption {
+export interface PricingOption {
   packageSize: string;
   price: number;
+  discount?: number; // Optional discount field
 }
 
-export default function ProductCard({ product }: { product: Product }) {
+// Extend Product to include discount field
+interface ExamProduct extends Product {
+  discount?: number; // Make discount optional
+}
+
+export default function ProductCard({ product }: { product: ExamProduct }) {
   const [selectedPrice, setSelectedPrice] = useState<PricingOption | null>(null);
   const [coupon, setCoupon] = useState<{ code: string; discount: number } | null>(null);
 
@@ -17,40 +23,56 @@ export default function ProductCard({ product }: { product: Product }) {
     ? product.images[0].replace('/upload/', '/upload/f_auto,q_auto/')
     : "/images.png";
 
-  // Set the first package as default
+  // ✅ Set first package as default
   useEffect(() => {
-    if (product.pricing && product.pricing.length > 0) {
+    if (product?.pricing && product.pricing.length > 0) {
       setSelectedPrice(product.pricing[0]);
     }
-  }, [product.pricing]);
+  }, [product]);
 
-  // Fetch active coupon from the API
+  // ✅ Fetch active coupon from Firebase API
   useEffect(() => {
     async function fetchCoupon() {
       try {
         const res = await fetch(`/api/coupon`);
-        const data = await res.json();
+        if (!res.ok) throw new Error(`API responded with status: ${res.status}`);
 
-        if (data.discount > 0) {
+        const data = await res.json();
+        if (data && typeof data.discount === "number" && data.discount > 0) {
           setCoupon({ code: data.code, discount: data.discount });
         } else {
           setCoupon(null);
         }
       } catch (error) {
         console.error("Error fetching coupon:", error);
+        setCoupon(null);
       }
     }
 
     fetchCoupon();
   }, []);
 
-  // Compute original price before discount so that the discounted price is equal to the selected price
-  const originalPrice = useMemo(() => {
-    if (!selectedPrice || !coupon) return selectedPrice?.price || 0;
+  // ✅ Compute original price & discounted price
+  const { originalPrice, discountedPrice, appliedDiscount } = useMemo(() => {
+    if (!selectedPrice) return { originalPrice: "N/A", discountedPrice: "N/A", appliedDiscount: 0 };
 
-    const discountFactor = 1 - (coupon.discount / 100);
-    return (selectedPrice.price / discountFactor).toFixed(2);
-  }, [selectedPrice, coupon]);
+    const discountedPrice = Number(selectedPrice.price); // Price stored in Firestore
+    if (isNaN(discountedPrice)) {
+      console.error("Invalid price value:", selectedPrice.price);
+      return { originalPrice: "N/A", discountedPrice: "N/A", appliedDiscount: 0 };
+    }
+
+    const discountFromCoupon = coupon?.discount ?? 0;
+    const discountFromProduct = product.discount ?? 0;
+
+    // Use the highest discount (Coupon OR Product discount)
+    const appliedDiscount = Math.max(discountFromCoupon, discountFromProduct);
+
+    // ✅ Calculate Original Price (discounted price + discount amount)
+    const originalPrice = (discountedPrice + (discountedPrice * appliedDiscount / 100)).toFixed(2);
+
+    return { originalPrice, discountedPrice: discountedPrice.toFixed(2), appliedDiscount };
+  }, [selectedPrice, coupon, product.discount]);
 
   return (
     <div className="p-4 border rounded shadow hover:shadow-md block bg-white">
@@ -80,10 +102,12 @@ export default function ProductCard({ product }: { product: Product }) {
             const selected = product.pricing?.find(
               (p) => p.packageSize === e.target.value
             );
-            setSelectedPrice(selected || null);
+            if (selected) {
+              setSelectedPrice(selected);
+            }
           }}
         >
-          {(product.pricing ?? []).map((option, index) => (
+          {product.pricing?.map((option, index) => (
             <option key={index} value={option.packageSize}>
               {option.packageSize}
             </option>
@@ -92,16 +116,14 @@ export default function ProductCard({ product }: { product: Product }) {
 
         {selectedPrice && (
           <div className="mt-2">
-            <p className="text-gray-500 line-through">
-              Before Discount: ₹{originalPrice}
-            </p>
-            <p className="font-semibold text-red-600">
-              Discounted Price: ₹{selectedPrice.price}
-            </p>
-            {coupon && (
+            <p className="text-gray-500 line-through">Original Price: ₹{originalPrice}</p>
+            <p className="font-semibold text-red-600">Discounted Price: ₹{discountedPrice}</p>
+            {appliedDiscount > 0 ? (
               <p className="text-blue-500">
-                Coupon Applied: {coupon.code} ({coupon.discount}% Off)
+                Discount Applied: {appliedDiscount}% Off ({coupon?.code ? `Coupon: ${coupon.code}` : "Product Discount"})
               </p>
+            ) : (
+              <p className="text-gray-400">No discounts available</p>
             )}
           </div>
         )}

@@ -5,19 +5,10 @@ import { useProduct } from "../../hooks/useProduct";
 import ProductImageGallery from "../../../components/ProductGallery";
 import ProductDetails from "../../../components/ProductDetail";
 import { useState, useEffect } from "react";
+import { Product } from "../../../../types/types";
 import api from "../../utils/api";
 
-// Adjust the type to match your real product shape:
-interface DealProduct {
-  id: string;
-  name: string;
-  images?: string[];
-  pricing?: Array<{
-    price: number;
-    packageSize?: string;
-  }>;
-  discount?: number; // optional if you track "Save: ₹X"
-}
+
 
 export default function ProductDetail() {
   const params = useParams();
@@ -26,7 +17,7 @@ export default function ProductDetail() {
   const router = useRouter();
 
   // -- HOT DEALS STATE --
-  const [hotDeals, setHotDeals] = useState<DealProduct[]>([]);
+  const [hotDeals, setHotDeals] = useState<Product[]>([]);
   const [dealLoading, setDealLoading] = useState(true);
   const [dealError, setDealError] = useState("");
 
@@ -35,7 +26,7 @@ export default function ProductDetail() {
     const fetchHotDeals = async () => {
       try {
         // Replace "/product" with your actual endpoint if different
-        const res = await api.get<{ data: DealProduct[] }>("/product");
+        const res = await api.get<{ data: Product[] }>("/product");
         setHotDeals(res.data.data);
       } catch (err: unknown) {
         console.error("Error fetching hot deals:", err);
@@ -200,7 +191,7 @@ export default function ProductDetail() {
                 <tr className="border-b border-gray-200">
                   <td className="py-2 px-3 text-gray-700">Arce</td>
                   <td className="py-2 px-3 text-gray-700">
-                    {product.dosage?.dosage?.arce || "N/A"}
+                    {product.dosage?.dosage?.acre || "N/A"}
                   </td>
                 </tr>
                 {/* Pricing (all packages) */}

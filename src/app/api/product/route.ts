@@ -59,7 +59,13 @@ export async function POST(req: NextRequest) {
       const base64Image = Buffer.from(buffer).toString("base64");
       const uploadResponse = await cloudinary.uploader.upload(`data:${image.type};base64,${base64Image}`, {
         folder: "products",
+        format: "jpg", // ✅ Force convert to JPG
+        transformation: [
+          { quality: "auto" }, // Auto-optimizes image quality
+          { fetch_format: "jpg" }, // Ensures JPG format
+        ],
       });
+      
       uploadedImageUrls.push(uploadResponse.secure_url);
     }
 

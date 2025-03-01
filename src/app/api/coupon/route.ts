@@ -1,64 +1,65 @@
 import { NextResponse } from "next/server";
+import { db } from "../../../../utils/firebase";
+import { doc, setDoc, getDoc, deleteDoc } from "firebase/firestore";
 
-// In-memory coupon storage (Replace with a DB later)
-let activeCoupon: { code: string; discount: number } | null = null;
-
-// ✅ GET request (Fetch Active Coupon)
-export async function GET() {
-  if (!activeCoupon) {
-    return NextResponse.json({ message: "No active coupon", discount: 0 }, { status: 200 });
-  }
-  return NextResponse.json(activeCoupon, { status: 200 });
+export interface Coupon {
+    code: string;          // Coupon code (e.g., "NEWYEAR")
+    discount: number;      // Discount percentage (e.g., 15 for 15% off)
+    createdAt: number;     // Timestamp in milliseconds (Date.now())
+    expiresAt?: number;    // Optional expiry date in milliseconds
 }
 
-// ✅ POST request (Apply a New Coupon)
+const COUPON_COLLECTION = "coupons"; // Firestore Collection Name
+
+// ✅ GET request (Fetch Active Coupon from Firebase)
+export async function GET() {
+  try {
+    const docRef = doc(db, COUPON_COLLECTION, "active");
+    const docSnap = await getDoc(docRef);
+
+    if (!docSnap.exists()) {
+      return NextResponse.json({ message: "No active coupon", discount: 0 }, { status: 200 });
+    }
+
+    return NextResponse.json(docSnap.data(), { status: 200 });
+  } catch (error) {
+    console.error("Error fetching coupon:", error);
+    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+  }
+}
+
+// ✅ POST request (Save Coupon to Firebase)
 export async function POST(req: Request) {
   try {
-    const { code, discount } = await req.json();
+    const { code, discount, expiresAt } = await req.json();
 
-    if (!code || typeof discount !== "number") {
-      return NextResponse.json({ error: "Invalid coupon code or discount value" }, { status: 400 });
+    if (!code || typeof discount !== "number" || discount > 20) {
+      return NextResponse.json({ error: "Invalid coupon code or discount" }, { status: 400 });
     }
 
-    if (discount > 20) {
-      return NextResponse.json({ error: "Discount cannot exceed 20%" }, { status: 400 });
-    }
+    const couponData: Coupon = {
+      code,
+      discount,
+      createdAt: Date.now(),
+      expiresAt: expiresAt ?? null, // Optional expiration
+    };
 
-    activeCoupon = { code, discount };
-    return NextResponse.json({ message: "Coupon applied successfully", coupon: activeCoupon }, { status: 200 });
+    await setDoc(doc(db, COUPON_COLLECTION, "active"), couponData);
 
+    return NextResponse.json({ message: "Coupon applied successfully", ...couponData }, { status: 200 });
   } catch (error) {
+    console.error("Error saving coupon:", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
 }
 
-// ✅ PUT request (Update Existing Coupon)
-export async function PUT(req: Request) {
-  try {
-    if (!activeCoupon) {
-      return NextResponse.json({ error: "No active coupon to update" }, { status: 404 });
-    }
-
-    const { code, discount } = await req.json();
-
-    if (!code || typeof discount !== "number") {
-      return NextResponse.json({ error: "Invalid coupon code or discount value" }, { status: 400 });
-    }
-
-    if (discount > 20) {
-      return NextResponse.json({ error: "Discount cannot exceed 20%" }, { status: 400 });
-    }
-
-    activeCoupon = { code, discount };
-    return NextResponse.json({ message: "Coupon updated successfully", coupon: activeCoupon }, { status: 200 });
-
-  } catch (error) {
-    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
-  }
-}
-
-// ✅ DELETE request (Remove Active Coupon)
+// ✅ DELETE request (Remove Coupon from Firebase)
 export async function DELETE() {
-  activeCoupon = null;
-  return NextResponse.json({ message: "Coupon removed" }, { status: 200 });
+  try {
+    await deleteDoc(doc(db, COUPON_COLLECTION, "active"));
+    return NextResponse.json({ message: "Coupon removed" }, { status: 200 });
+  } catch (error) {
+    console.error("Error deleting coupon:", error);
+    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+  }
 }

@@ -1,6 +1,7 @@
 import { useRouter } from "next/navigation";
 import { useQuantity } from "../app/hooks/useQuantity";
 import { useUserId } from "../app/hooks/useId";
+import { Product } from "../../types/types";
 import api from "../app/utils/api"; 
 import { useState } from "react";
 
@@ -9,13 +10,6 @@ interface PricingOption {
   price: number;
 }
 
-interface Product {
-  id: string;
-  name: string;
-  category: string;
-  description: string;
-  pricing: PricingOption[];
-}
 
 interface ProductDetailsProps {
   product: Product;

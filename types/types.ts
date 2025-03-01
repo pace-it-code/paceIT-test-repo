@@ -26,7 +26,9 @@
         method: string;           // Dosage method (e.g., 'Mix with water and rub on seeds')
         dosage:{dose:string,acre:string}
       };
-      benefits: string[];         // List of product benefits
+      benefits: string[];  
+      discount?:number
+          // List of product benefits
     }
  
     export interface Pricing{
