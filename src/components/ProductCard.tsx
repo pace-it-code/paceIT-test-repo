@@ -1,14 +1,12 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useState } from "react";
-import {Product} from "../../types/types"
+import { Product } from "../../types/types";
 
 interface PricingOption {
   packageSize: string;
   price: number;
 }
-
-
 
 export default function ProductCard({ product }: { product: Product }) {
   const [selectedPrice, setSelectedPrice] = useState<PricingOption | null>(null);
@@ -26,7 +24,7 @@ export default function ProductCard({ product }: { product: Product }) {
             src={productImage}
             alt={product.name}
             fill
-            className="rounded-md"
+            className="rounded-md object-contain"
             priority
           />
         </div>
