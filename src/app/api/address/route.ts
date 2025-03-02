@@ -3,6 +3,7 @@ import { db } from "../../../../utils/firebase";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 
 interface Address {
+    name:string,
     line1: string;
     line2?: string;
     state: string;

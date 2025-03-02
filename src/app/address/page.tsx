@@ -5,6 +5,7 @@ import { useUserId } from "../hooks/useId"; // Custom hook to get userId
 import axios from "axios";
 
 interface Address {
+  name:string,
   line1: string;
   line2?: string;
   state: string;
@@ -17,6 +18,7 @@ export default function AddressPage() {
 const router = useRouter()
   const userId = useUserId(); // Get userId from session or context
   const [address, setAddress] = useState<Address>({
+    name:"",
     line1: "",
     line2: "",
     state: "",
@@ -79,6 +81,15 @@ const router = useRouter()
     <div className="max-w-lg mx-auto mt-10 p-6 bg-white shadow-lg rounded-lg">
       <h1 className="text-2xl font-bold text-center mb-6">Your Address</h1>
       <form onSubmit={handleSave} className="space-y-4">
+      <input
+          type="text"
+          name="name"
+          placeholder="Your name"
+          value={address.name}
+          onChange={handleChange}
+          required
+          className="w-full p-2 border rounded"
+        />
         <input
           type="text"
           name="line1"

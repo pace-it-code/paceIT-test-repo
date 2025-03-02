@@ -13,6 +13,7 @@ interface CartItem {
 }
 
 interface Address {
+    name:string,
     line1: string;
     line2?: string;
     city: string;
@@ -33,7 +34,7 @@ export async function POST(request: Request) {
 
     try {
         const body = await request.json();
-        const { userId }: { userId: string } = body;
+        const { userId, paymentMethod = "Prepaid" }: { userId: string; paymentMethod?: string } = body;
 
         console.log("Received Request Body:", body);
 
@@ -64,6 +65,7 @@ export async function POST(request: Request) {
 
         console.log("Fetched Address:", address);
         console.log("Fetched Cart Items:", cartItems);
+        console.log("Payment Method:", paymentMethod);
 
         if (!address) {
             console.error("No valid address found for the user.");
@@ -104,11 +106,14 @@ export async function POST(request: Request) {
             hsn: 44122,
         }));
 
+        // Determine the correct payment method string for Shiprocket
+        const shiprocketPaymentMethod = paymentMethod === "COD" ? "COD" : "Prepaid";
+        
         const orderData = {
             order_id: `ORDER_${userId}_${Date.now()}`,
             order_date: new Date().toISOString().slice(0, 10),
             pickup_location: "home",
-            billing_customer_name: "John Doe",
+            billing_customer_name: address.name,
             billing_last_name: "Doe",
             billing_address: address.line1,
             billing_address_2: address.line2 || "",
@@ -120,7 +125,7 @@ export async function POST(request: Request) {
             billing_phone: parseInt(address.phone, 10),
             shipping_is_billing: true,
             order_items: orderItems,
-            payment_method: "Prepaid",
+            payment_method: shiprocketPaymentMethod,
             shipping_charges: 0,
             giftwrap_charges: 0,
             transaction_charges: 0,

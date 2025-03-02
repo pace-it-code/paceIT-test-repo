@@ -23,6 +23,7 @@ export async function PUT(req: Request): Promise<NextResponse> {
     // Check if address already exists
     const exists = addresses.some(
       (addr) =>
+        addr.name === address.name &&
         addr.line1 === address.line1 &&
         addr.city === address.city &&
         addr.state === address.state &&
