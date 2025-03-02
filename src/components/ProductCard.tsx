@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useState, useEffect, useMemo } from "react";
 import { Product } from "../../types/types";
+import api from "../app/utils/api"; // Import API utility
 
 export interface PricingOption {
   packageSize: string;
@@ -17,17 +18,30 @@ export default function ProductCard({ product }: { product: ExamProduct }) {
   const [selectedPrice, setSelectedPrice] = useState<PricingOption | null>(null);
   const [coupon, setCoupon] = useState<{ code: string; discount: number } | null>(null);
   const [isHovered, setIsHovered] = useState(false);
+  const [userId, setUserId] = useState<string>("");
+  const [quantity, setQuantity] = useState(1); // Default quantity
 
+  // Get product image
   const productImage = product.images?.[0]
     ? product.images[0].replace('/upload/', '/upload/f_auto,q_auto/')
     : "/images.png";
 
+  // Load userId from localStorage
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const storedUserId = localStorage.getItem("userId") || "";
+      setUserId(storedUserId);
+    }
+  }, []);
+
+  // Set default pricing option
   useEffect(() => {
     if (product?.pricing && product.pricing.length > 0) {
       setSelectedPrice(product.pricing[0]);
     }
   }, [product]);
 
+  // Fetch available coupons
   useEffect(() => {
     async function fetchCoupon() {
       try {
@@ -49,6 +63,7 @@ export default function ProductCard({ product }: { product: ExamProduct }) {
     fetchCoupon();
   }, []);
 
+  // Calculate price & discount
   const { originalPrice, discountedPrice, appliedDiscount } = useMemo(() => {
     if (!selectedPrice) return { originalPrice: "N/A", discountedPrice: "N/A", appliedDiscount: 0 };
 
@@ -66,6 +81,39 @@ export default function ProductCard({ product }: { product: ExamProduct }) {
     return { originalPrice, discountedPrice: discountedPrice.toFixed(2), appliedDiscount };
   }, [selectedPrice, coupon, product.discount]);
 
+  // ✅ Add item to cart
+  const addToCart = async (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent unwanted navigation
+    e.preventDefault();  // Prevent page reload
+  
+    if (!userId) {
+      alert("User ID not found. Please log in.");
+      return;
+    }
+    if (!selectedPrice) {
+      alert("Please select a package size.");
+      return;
+    }
+  
+    try {
+      const response = await api.put("/cart", {
+        userId,
+        productId: product.id,
+        quantity: 1, // ✅ Always stores quantity as 1
+        packageSize: selectedPrice.packageSize,
+      });
+  
+      if (response.data.success) {
+        alert("✅ Product added to cart!");
+      } else {
+        alert("❌ Failed to add to cart.");
+      }
+    } catch (err) {
+      console.error("Error adding to cart:", err);
+      alert("❌ Error adding to cart. Please try again.");
+    }
+  };
+  
   return (
     <div 
       className="overflow-hidden bg-white border border-gray-100 rounded-lg shadow-sm transition-all duration-200 hover:shadow-md"
@@ -94,6 +142,7 @@ export default function ProductCard({ product }: { product: ExamProduct }) {
           <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">{product.category}</p>
           <h2 className="text-lg font-medium text-gray-800 mb-3">{product.name}</h2>
           
+          {/* Package Size Selector */}
           <select
             id="pricing"
             name="pricing"
@@ -123,16 +172,23 @@ export default function ProductCard({ product }: { product: ExamProduct }) {
                 )}
                 <span className="text-lg font-semibold text-gray-900">₹{discountedPrice}</span>
               </div>
-              
-              <button className={`text-white text-sm px-4 py-2 rounded-md transition-all duration-300 ${
-                isHovered ? 'bg-emerald-600' : 'bg-emerald-500'
-              }`}>
-                Add to cart
-              </button>
+
+              {/* Quantity Selector */}
+             
+
+              {/* Add to Cart Button */}
+            {/* ✅ Add to Cart Button (Quantity is always 1) */}
+<button 
+  className={`text-white text-sm px-4 py-2 rounded-md transition-all duration-300 ${
+    isHovered ? 'bg-emerald-600' : 'bg-emerald-500'
+  }`}
+  onClick={addToCart} // ✅ Calls function to add with quantity = 1
+>
+  Add to Cart 🛒
+</button>
+
             </div>
           )}
-          
-          
         </div>
       </Link>
     </div>
