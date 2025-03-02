@@ -52,6 +52,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: false, error: "Missing required fields" }, { status: 400 });
     }
 
+    const search = name.toLowerCase().replace(/\s+/g, "");
     // Upload images to Cloudinary
     const uploadedImageUrls: string[] = [];
     for (const image of images) {
@@ -72,6 +73,7 @@ export async function POST(req: NextRequest) {
     // Creating product object
     const newProduct = {
       name,
+      
       description,
       category,
       images: uploadedImageUrls,
@@ -80,6 +82,7 @@ export async function POST(req: NextRequest) {
       composition,
       commonlyUsedFor,
       avoidForCrops,
+      search,
       pricing,
       dosage: {
         method,
