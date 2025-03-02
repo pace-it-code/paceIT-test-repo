@@ -23,11 +23,11 @@ interface Address {
 }
 
 interface UserData {
-    address?: Address[];
+    address?: Address; // ✅ Now storing only one address (not an array)
     cart?: CartItem[];
 }
 
-// POST method to handle Shiprocket order creation
+// ✅ POST method to handle Shiprocket order creation
 export async function POST(request: Request) {
     console.log("API call initiated: /api/ship");
 
@@ -45,7 +45,7 @@ export async function POST(request: Request) {
             );
         }
 
-        // Fetch user data from Firebase
+        // ✅ Fetch user data from Firebase
         console.log(`Fetching user data for userId: ${userId}`);
         const userRef = doc(db, "users", userId);
         const userSnap = await getDoc(userRef);
@@ -59,14 +59,11 @@ export async function POST(request: Request) {
         }
 
         const userData = userSnap.data() as UserData;
-        const addresses = userData?.address || [];
+        const address = userData?.address || null; // ✅ Now fetching as a single object
         const cartItems = userData?.cart || [];
 
-        console.log("Fetched Addresses:", addresses);
+        console.log("Fetched Address:", address);
         console.log("Fetched Cart Items:", cartItems);
-
-        // Automatically fetch the first available address
-        const address = addresses.length > 0 ? addresses[0] : null;
 
         if (!address) {
             console.error("No valid address found for the user.");
@@ -96,10 +93,10 @@ export async function POST(request: Request) {
 
         console.log("Shiprocket API Token acquired.");
 
-        // Prepare the order data for Shiprocket
+        // ✅ Prepare the order data for Shiprocket
         const orderItems = cartItems.map((item: CartItem) => ({
             name: item.name,
-            sku: item.productId || "SKU123",
+            sku: item.productId || `SKU_${item.name.replace(/\s+/g, "_").toUpperCase()}`,
             units: item.quantity,
             selling_price: item.price,
             discount: 0,
@@ -118,7 +115,7 @@ export async function POST(request: Request) {
             billing_city: address.city,
             billing_pincode: parseInt(address.zip, 10),
             billing_state: address.state,
-            billing_country: "India",
+            billing_country: address.country || "India",
             billing_email: "customer@example.com",
             billing_phone: parseInt(address.phone, 10),
             shipping_is_billing: true,
@@ -137,7 +134,7 @@ export async function POST(request: Request) {
 
         console.log("Prepared Order Data:", JSON.stringify(orderData, null, 2));
 
-        // Create the order in Shiprocket
+        // ✅ Create the order in Shiprocket
         const response = await axios.post(
             `${SHIPROCKET_API_BASE}/orders/create/adhoc`,
             orderData,
@@ -168,7 +165,7 @@ export async function POST(request: Request) {
     }
 }
 
-// GET method to handle unsupported requests
+// ✅ GET method to handle unsupported requests
 export async function GET() {
     return NextResponse.json(
         { success: false, error: "GET method not allowed" },

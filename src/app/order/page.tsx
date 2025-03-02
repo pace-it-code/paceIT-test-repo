@@ -68,11 +68,11 @@ if (!razorpayKey) {
     const fetchAddress = async () => {
       if (!userId) return;
       try {
-        const res = await api.get<{ success: boolean; data: Address[] }>(
+        const res = await api.get<{ success: boolean; data: Address }>(
           `/address?userId=${userId}`
         );
-        if (res.data.success && res.data.data.length > 0) {
-          setAddress(res.data.data[0]);
+        if (res.data.success ) {
+          setAddress(res.data.data);
         } else {
           alert("No address found. Please add an address before placing an order.");
           router.push("/address");
