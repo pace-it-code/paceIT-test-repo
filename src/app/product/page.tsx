@@ -30,14 +30,12 @@ export default function ProductList() :  React.ReactElement {
   if (error) return <p className="text-red-500">❌ {error}</p>;
 
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold">Product List</h1>
-      <Link href="/add" className="btn bg-blue-500 text-white p-2 rounded">Add Product</Link>
+    
       <div className="grid grid-cols-3 gap-4 mt-4">
         {products.length === 0 ? <p>No products found.</p> : products.map((product) => (
           <ProductCard key={product.id} product={product} />
         ))}
       </div>
-    </div>
+  
   );
 }

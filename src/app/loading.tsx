@@ -1,9 +1,12 @@
-"use client"; // If using client-side animations (optional)
+"use client";
+
+import Lottie from "lottie-react";
+import animationData from "../../public/loading.json" // Import the .lottie file
 
 export default function Loading() {
   return (
-    <div className="flex h-screen items-center justify-center">
-      <div className="w-16 h-16 border-4 border-gray-300 border-t-blue-500 rounded-full animate-spin"></div>
+    <div className="flex h-screen items-center justify-center bg-white">
+      <Lottie animationData={animationData} loop={true} className="w-48 h-48" />
     </div>
   );
 }

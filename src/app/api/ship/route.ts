@@ -114,7 +114,7 @@ export async function POST(request: Request) {
             order_date: new Date().toISOString().slice(0, 10),
             pickup_location: "home",
             billing_customer_name: address.name,
-            billing_last_name: "Doe",
+            billing_last_name: "",
             billing_address: address.line1,
             billing_address_2: address.line2 || "",
             billing_city: address.city,

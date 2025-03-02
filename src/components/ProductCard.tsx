@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo ,useRef} from "react";
 import { Product } from "../../types/types";
 import api from "../app/utils/api"; // Import API utility
 
@@ -42,8 +42,16 @@ export default function ProductCard({ product }: { product: ExamProduct }) {
   }, [product]);
 
   // Fetch available coupons
+  
   useEffect(() => {
     async function fetchCoupon() {
+      // ✅ Check if coupon is already stored in sessionStorage
+      const storedCoupon = sessionStorage.getItem("coupon");
+      if (storedCoupon) {
+        setCoupon(JSON.parse(storedCoupon)); // ✅ Use cached coupon
+        return;
+      }
+
       try {
         const res = await fetch(`/api/coupon`);
         if (!res.ok) throw new Error(`API responded with status: ${res.status}`);
@@ -51,6 +59,7 @@ export default function ProductCard({ product }: { product: ExamProduct }) {
         const data = await res.json();
         if (data && typeof data.discount === "number" && data.discount > 0) {
           setCoupon({ code: data.code, discount: data.discount });
+          sessionStorage.setItem("coupon", JSON.stringify({ code: data.code, discount: data.discount })); // ✅ Store in session
         } else {
           setCoupon(null);
         }
@@ -61,7 +70,7 @@ export default function ProductCard({ product }: { product: ExamProduct }) {
     }
 
     fetchCoupon();
-  }, []);
+  }, []); // ✅ Runs only on in
 
   // Calculate price & discount
   const { originalPrice, discountedPrice, appliedDiscount } = useMemo(() => {
