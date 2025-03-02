@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef ,useCallback} from "react";
 import { ChevronLeft, ChevronRight, Leaf, Droplet, Shield, Sprout } from "lucide-react";
 
 const slides = [
@@ -35,25 +35,27 @@ export default function HeroSlider() {
   const sliderRef = useRef<HTMLDivElement>(null);
   const autoplayRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  const startAutoPlay = () => {
-    stopAutoPlay();
-    autoplayRef.current = setInterval(() => {
-      setCurrentIndex((prevIndex) => (prevIndex + 1) % slides.length);
-    }, 6000);
-  };
-
-  const stopAutoPlay = () => {
+  
+  
+  const stopAutoPlay = useCallback(() => {
     if (autoplayRef.current !== null) {
       clearInterval(autoplayRef.current);
       autoplayRef.current = null;
     }
-  };
+  }, []);
+
+  const startAutoPlay = useCallback(() => {
+    stopAutoPlay();
+    autoplayRef.current = setInterval(() => {
+      setCurrentIndex((prevIndex) => (prevIndex + 1) % slides.length);
+    }, 6000);
+  }, [stopAutoPlay]);
 
   useEffect(() => {
     startAutoPlay();
     return () => stopAutoPlay();
-  }, []);
-
+  }, [startAutoPlay, stopAutoPlay]);
+  
   const goToSlide = (index: number) => {
     setCurrentIndex(index);
     startAutoPlay();

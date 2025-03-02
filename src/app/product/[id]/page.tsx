@@ -6,6 +6,7 @@ import ProductImageGallery from "../../../components/ProductGallery";
 import ProductDetails from "../../../components/ProductDetail";
 import { useState, useEffect } from "react";
 import { Product } from "../../../../types/types";
+import Image from "next/image";
 import api from "../../utils/api";
 
 
@@ -251,11 +252,13 @@ export default function ProductDetail() {
                       href={`/product/${deal.id}`}
                       className="bg-[#f9f9f9] border border-gray-300 rounded p-4 text-center w-[200px]"
                     >
-                      <img
-                        src={dealImage}
-                        alt={deal.name}
-                        className="w-20 h-20 mx-auto object-cover mb-3"
-                      />
+                   <Image
+  src={dealImage}
+  alt={deal.name}
+  width={80}
+  height={80}
+  className="mx-auto object-cover mb-3"
+/>
                       <p>{deal.name}</p>
                       <p className="font-semibold text-green-600">
                         ₹{dealPrice}

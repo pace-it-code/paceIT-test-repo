@@ -1,10 +1,10 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { db } from "../../../../utils/firebase";
-import { collection,query,where , getDocs ,updateDoc,doc} from "firebase/firestore";
+import { collection, getDocs ,updateDoc,doc} from "firebase/firestore";
 
 
 
-export async function GET(req: NextRequest) {
+export async function GET() {
     try {
       const productsRef = collection(db, "products");
       const querySnapshot = await getDocs(productsRef);
