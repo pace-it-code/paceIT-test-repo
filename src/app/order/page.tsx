@@ -9,11 +9,20 @@ import Script from "next/script";
 
 import { AddressCard } from "../../components/Addresscard";
 import { CartSummary, calculateCartTotal } from "../../components/Cartsummary";
-import { PaymentMethodSelector, PaymentMethod } from "../../components/Payementmethod";
-import { createRazorpayOrder, verifyRazorpayPayment, createShiprocketOrder, initializeRazorpayPayment } from "../../components/Orderservice";
+
+import {
+  PaymentMethodSelector,
+  PaymentMethod,
+} from "../../components/Payementmethod";
+import {
+  createRazorpayOrder,
+  verifyRazorpayPayment,
+  createShiprocketOrder,
+  initializeRazorpayPayment,
+} from "../../components/Orderservice";
 
 interface Address {
-  id: string; 
+  id: string;
   name: string;
   line1: string;
   line2?: string;
@@ -34,14 +43,17 @@ export default function ConfirmOrderPage() {
   const userId = useUserId();
   const { cart, loading, error } = useCart(userId);
   const [address, setAddress] = useState<Address | null>(null);
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('ONLINE');
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("ONLINE");
   const [isProcessing, setIsProcessing] = useState(false);
   const razorpayKey = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
 
   if (!razorpayKey) {
-    throw new Error("Razorpay key is missing. Please set NEXT_PUBLIC_RAZORPAY_KEY_ID in environment variables.");
+    throw new Error(
+      "Razorpay key is missing. Please set NEXT_PUBLIC_RAZORPAY_KEY_ID in environment variables."
+    );
   }
 
+  // Fetch user address from backend
   useEffect(() => {
     const fetchAddress = async () => {
       if (!userId) return;
@@ -62,13 +74,13 @@ export default function ConfirmOrderPage() {
     fetchAddress();
   }, [userId, router]);
 
+  // Handle COD order
   const handleCODOrder = async () => {
     if (!userId || !address) return;
     setIsProcessing(true);
-    
+
     try {
-      // Create Shiprocket order directly for COD
-      const orderId = await createShiprocketOrder(userId, 'COD');
+      const orderId = await createShiprocketOrder(userId, "COD");
       alert("Order placed successfully!");
       router.push(`/order-confirmation?orderId=${orderId}`);
     } catch (error) {
@@ -79,6 +91,7 @@ export default function ConfirmOrderPage() {
     }
   };
 
+  // Handle Online Payment
   const handleOnlinePayment = async () => {
     if (!userId || !address) return;
     setIsProcessing(true);
@@ -86,10 +99,8 @@ export default function ConfirmOrderPage() {
     const totalAmount = calculateCartTotal(cart);
 
     try {
-      // Create Razorpay order
       const orderId = await createRazorpayOrder(totalAmount);
-      
-      // Initialize Razorpay payment
+
       initializeRazorpayPayment(
         razorpayKey,
         orderId,
@@ -97,12 +108,12 @@ export default function ConfirmOrderPage() {
         address,
         async (response: RazorpayResponse) => {
           try {
-            // Verify payment
             const isVerified = await verifyRazorpayPayment(response);
-            
             if (isVerified) {
-              // Create Shiprocket order
-              const shiprocketOrderId = await createShiprocketOrder(userId, 'ONLINE');
+              const shiprocketOrderId = await createShiprocketOrder(
+                userId,
+                "ONLINE"
+              );
               alert("Order placed successfully!");
               router.push(`/order-confirmation?orderId=${shiprocketOrderId}`);
             } else {
@@ -123,51 +134,73 @@ export default function ConfirmOrderPage() {
     }
   };
 
+  // Decide which payment method to process
   const handlePlaceOrder = () => {
-    if (paymentMethod === 'COD') {
+    if (paymentMethod === "COD") {
       handleCODOrder();
     } else {
       handleOnlinePayment();
     }
   };
 
-  if (loading) return <p className="text-center text-lg py-10">Loading cart...</p>;
-  if (error) return <p className="text-center text-red-500 py-10">Error loading cart: {error}</p>;
-  if (!address) return <p className="text-center text-lg py-10">Loading address...</p>;
-  
+  // Loading / error states
+  if (loading) {
+    return <p className="text-center text-lg py-10">Loading cart...</p>;
+  }
+  if (error) {
+    return (
+      <p className="text-center text-red-500 py-10">
+        Error loading cart: {error}
+      </p>
+    );
+  }
+  if (!address) {
+    return <p className="text-center text-lg py-10">Loading address...</p>;
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-r from-indigo-50 to-white py-12">
-      <Script
-        type="text/javascript"
-        src="https://checkout.razorpay.com/v1/checkout.js"
-      />
-      <div className="max-w-5xl mx-auto bg-white rounded-xl shadow-lg p-8">
-        <h1 className="text-4xl font-bold text-center text-gray-800 mb-8">
+      {/* Razorpay checkout script */}
+      <Script type="text/javascript" src="https://checkout.razorpay.com/v1/checkout.js" />
+
+      <div className="max-w-7xl mx-auto bg-white rounded-xl shadow-lg p-8">
+        <h1 className="text-3xl md:text-4xl font-bold text-center text-gray-800 mb-8">
           Confirm Your Order
         </h1>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {/* Delivery Address Card */}
-          <AddressCard address={address} />
-          
-          {/* Cart Summary Card */}
-          <CartSummary cart={cart} />
+
+        {/* Three-column layout for Address, Payment, and Cart Summary */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Left Column: Address */}
+          <div>
+            <AddressCard address={address} />
+          </div>
+
+          {/* Middle Column: Payment Method */}
+          <div>
+            <PaymentMethodSelector
+              selectedMethod={paymentMethod}
+              onMethodChange={setPaymentMethod}
+            />
+          </div>
+
+          {/* Right Column: Cart Summary */}
+          <div>
+            <CartSummary cart={cart} />
+          </div>
         </div>
 
-        {/* Payment Method Selection */}
-        <div className="mt-8">
-          <PaymentMethodSelector 
-            selectedMethod={paymentMethod} 
-            onMethodChange={setPaymentMethod} 
-          />
-        </div>
-
-        <div className="mt-8 text-center">
+        {/* Place Order Button (bottom-right) */}
+        <div className="mt-8 flex justify-end">
           <button
             onClick={handlePlaceOrder}
             disabled={isProcessing}
-            className={`${isProcessing ? 'bg-gray-400' : 'bg-green-500 hover:bg-green-600'} transition-colors text-white px-8 py-4 rounded-full text-xl font-semibold shadow-lg`}
+            className={`${
+              isProcessing ? "bg-gray-400" : "bg-green-500 hover:bg-green-600"
+            } transition-colors text-white px-8 py-4 rounded-full text-xl font-semibold shadow-lg`}
           >
-            {isProcessing ? '⏳ Processing...' : `✅ Place Order ${paymentMethod === 'COD' ? '(COD)' : ''}`}
+            {isProcessing
+              ? "⏳ Processing..."
+              : `✅ Place Order ${paymentMethod === "COD" ? "(COD)" : ""}`}
           </button>
         </div>
       </div>

@@ -194,7 +194,7 @@ export default function CartPage() {
                     />
                     <div>
                       <h2 className="text-lg font-semibold">{item.name}</h2>
-                      <p className="text-gray-700">Price: ${item.price}</p>
+                      <p className="text-gray-700">Price: ₹{item.price}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-4">
@@ -258,7 +258,7 @@ export default function CartPage() {
                     {itemCount} Items
                   </p>
                   <p className="font-semibold text-xl text-indigo-600">
-                    ${itemsTotal.toFixed(2)}
+                   ₹{itemsTotal.toFixed(2)}
                   </p>
                 </div>
                 <button
