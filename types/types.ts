@@ -1,33 +1,61 @@
 
-export interface Product {
-  id: string;         // Firestore-generated Product ID
-  name: string;       // Product Name
-  description: string;// Product Description
-  price: number;      // Price of the Product
-  category: string;   // Category (e.g., Electronics, Clothing)
-  stock: number;      // Available Stock
-  images: string[];   // Array of image URLs
-  createdAt: string;  // Timestamp of product creation
-}
+    // export interface Product {
+    //   id: string;         // Firestore-generated Product ID
+    //   name: string;       // Product Name
+    //   description: string;// Product Description
+    //   pricing: Pricing[]; // Price of the Product
+    //   category: string;   // Category (e.g., Electronics, Clothing)
+    //   stock: number;      // Available Stock
+    //   images: string[];   // Array of image URLs
+    //   createdAt: string;  // Timestamp of product creation
+    // }
 
-  export interface User {
-    id: string;         // Firestore-generated User ID
-    email: string;      // User Email
-    name: string;       // User Name
-    password: string;   // Hashed Password (should be hashed before storing)
-    cart: CartItem[];   // Array of Cart Items
-  }
+    export interface Product {
+      id: string;                 // Firestore-generated Product ID
+      name: string;               // Product Name (e.g., 'Bayer Evergol Xtend')
+      description: string;        // Detailed Product Description          
+      category: string;           // Category (e.g., 'Seed Treatment')
+      pricing:Pricing[];
+      images: string[];           // Array of image URLs
+      createdAt: string;          // Timestamp of product creation
+      manufacturer: string;       // Manufacturer Name (e.g., 'Bayer Crop Science')
+      composition: string;        // Composition / Technical details
+      commonlyUsedFor: string[];  // List of crops commonly used for (e.g., ['corn', 'soybean', 'cereals', 'pulses', 'rice'])
+      avoidForCrops: string[]; 
+      search?:string;   // Crops to avoid usage (e.g., ['wheat', 'hybrid seed'])
+      dosage: {
+        method: string;           // Dosage method (e.g., 'Mix with water and rub on seeds')
+        dosage:{dose:string,acre:string}
+      };
+      benefits: string[];  
+      discount?:number
+          // List of product benefits
+    }
+ 
+    export interface Pricing{
+      price:number,
+      packageSize:string
+    }
+
+    export interface User {
+      id: string;         // Firestore-generated User ID
+      email: string;      // User Email
+      name: string;       // User Name
+      password: string;   // Hashed Password (should be hashed before storing)
+      address: Address[];
+      cart: CartItem[];   // Array of Cart Items
+    }
+    
   
-  
-  export interface CartItem {
-    productId: string; // ID of the product in the cart
-    quantity: number;  // Number of items added
-    price: number;     // Price at the time of adding
-    name: string;      // Product name (to avoid extra Firestore reads)
-    image: string;     // Main product image
-    addedAt: string;   // Timestamp when added to cart
-  }
-  
+    export interface CartItem {
+      productId: string; // ID of the product in the cart
+      quantity: number;  // Number of items added
+      price: number;     // Price at the time of adding
+      name: string;      // Product name (to avoid extra Firestore reads)
+      image: string;     // Main product image
+      packageSize: string; // Selected package size
+      addedAt: string;   // Timestamp when added to cart
+    }
   
   export interface Order {
     id: string;         // Firestore-generated Order ID
@@ -57,3 +85,11 @@ export interface Product {
     createdAt: string;  // Timestamp of review submission
   }
   
+  export interface Address{
+    id:string,
+    line1:string,
+    line2?:string,
+    state:string,
+    city:string,
+    zip:string
+  }
