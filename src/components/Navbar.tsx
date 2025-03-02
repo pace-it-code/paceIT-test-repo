@@ -15,7 +15,7 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
-  
+
   // Handle navbar transparency on scroll
   useEffect(() => {
     const handleScroll = () => {
@@ -27,39 +27,44 @@ export default function Navbar() {
   }, []);
 
   return (
-    <nav 
-      className={`fixed top-0 left-0 right-0 bg-greens z-50 transition-all duration-300 ${
-        scrolled ? "py-2 shadow-lg" : "py-4"
-      }`}
-    >
-      <div className="max-w-7xl mx-auto px-4 flex items-center justify-between">
-        {/* Mobile Menu Button */}
-        <button 
-          className="md:hidden text-white bg-white/10 p-2 rounded-full hover:bg-white/20 transition-colors" 
-          onClick={toggleMenu}
-          aria-label="Toggle menu"
-        >
-          {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-        </button>
+    <>
+      <nav 
+        className={`fixed top-0 left-0 right-0 bg-greens z-50 transition-all duration-300 ${
+          scrolled ? "py-2 shadow-lg" : "py-4"
+        }`}
+      >
+        <div className="max-w-7xl mx-auto px-4 flex items-center justify-between">
+          {/* Mobile Menu Button */}
+          <button 
+            className="md:hidden text-white bg-white/10 p-2 rounded-full hover:bg-white/20 transition-colors" 
+            onClick={toggleMenu}
+            aria-label="Toggle menu"
+          >
+            {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          </button>
 
-        {/* Logo */}
-        <NavLogo />
+          {/* Logo */}
+          <NavLogo />
 
-        {/* Desktop Navigation Links */}
-        <DesktopNavLinks />
+          {/* Desktop Navigation Links */}
+          <DesktopNavLinks />
 
-        {/* Centered Search Bar - Desktop */}
-        <SearchBar />
+          {/* Centered Search Bar - Desktop */}
+          <SearchBar />
 
-        {/* Icons on the Right */}
-        <NavIcons />
-      </div>
+          {/* Icons on the Right */}
+          <NavIcons />
+        </div>
 
-      {/* Mobile Search */}
-      <MobileSearch isMenuOpen={isMenuOpen} />
+        {/* Mobile Search */}
+        <MobileSearch isMenuOpen={isMenuOpen} />
 
-      {/* Mobile Dropdown Menu */}
-      {isMenuOpen && <MobileMenu />}
-    </nav>
+        {/* Mobile Dropdown Menu */}
+        {isMenuOpen && <MobileMenu />}
+      </nav>
+
+      {/* This one line below pushes the main content below the fixed navbar */}
+      <div className="h-20" />
+    </>
   );
 }
