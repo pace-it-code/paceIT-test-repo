@@ -99,14 +99,17 @@ export default function CartPage() {
   };
 
   // Remove an item from the cart
-  const removeCartItem = async (productId: string) => {
-    setCart(prevCart => prevCart.filter(item => item.productId !== productId));
-    latestCartRef.current = latestCartRef.current.filter(
-      item => item.productId !== productId
+  const removeCartItem = async (productId: string, packageSize: string) => {
+    setCart(prevCart =>
+      prevCart.filter(item => !(item.productId === productId && item.packageSize === packageSize))
     );
-    delete quantityChanges.current[productId];
+    latestCartRef.current = latestCartRef.current.filter(
+      item => !(item.productId === productId && item.packageSize === packageSize)
+    );
+    delete quantityChanges.current[`${productId}-${packageSize}`];
+  
     try {
-      await api.delete(`/cart?userId=${userId}&productId=${productId}`);
+      await api.delete(`/cart?userId=${userId}&productId=${productId}&packageSize=${packageSize}`);
     } catch (err) {
       console.error(err);
     }
@@ -213,7 +216,7 @@ export default function CartPage() {
                       </button>
                     </div>
                     <button
-                      onClick={() => removeCartItem(item.productId)}
+                      onClick={() => removeCartItem(item.productId,item.packageSize)}
                       className="px-4 py-2 bg-red-500 text-white rounded"
                     >
                       ❌ Remove
