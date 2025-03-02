@@ -2,7 +2,7 @@
 import React from "react";
 import { useState, useEffect } from "react";
 import api from "../utils/api";
-import Link from "next/link";
+
 import ProductCard from "../../components/ProductCard";
 import { Product } from "../../../types/types";
 

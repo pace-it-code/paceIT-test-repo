@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { useState, useEffect, useMemo ,useRef} from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Product } from "../../types/types";
 import api from "../app/utils/api"; // Import API utility
 
@@ -19,7 +19,7 @@ export default function ProductCard({ product }: { product: ExamProduct }) {
   const [coupon, setCoupon] = useState<{ code: string; discount: number } | null>(null);
   const [isHovered, setIsHovered] = useState(false);
   const [userId, setUserId] = useState<string>("");
-  const [quantity, setQuantity] = useState(1); // Default quantity
+
 
   // Get product image
   const productImage = product.images?.[0]

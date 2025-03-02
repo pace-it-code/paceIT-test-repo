@@ -1,5 +1,4 @@
 // components/payment/PaymentMethodSelector.tsx
-import React from 'react';
 
 export type PaymentMethod = 'ONLINE' | 'COD';
 

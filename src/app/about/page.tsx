@@ -1,7 +1,7 @@
 "use client"
 import React, { useEffect, useRef } from 'react';
 import Image from 'next/image';
-import { Truck, Users, Award, Leaf, Sprout, Mountain, BarChart } from 'lucide-react';
+import { Truck, Users, Award, Leaf, Sprout, Mountain } from 'lucide-react';
 
 const AboutUs = () => {
   const statsRef = useRef<HTMLDivElement>(null);
@@ -74,7 +74,7 @@ const AboutUs = () => {
                 Founded in 1995 by agricultural scientists with a vision for more sustainable farming, GreenGrow Fertilizers began as a small research lab focused on developing eco-friendly alternatives to conventional chemical fertilizers.
               </p>
               <p className="text-lg text-gray-600 mb-4">
-                Over the decades, we've expanded our product range while staying true to our core values of innovation, sustainability, and farmer success. Today, we serve agricultural communities across the country with our premium fertilizer solutions.
+                Over the decades, we&aposve expanded our product range while staying true to our core values of innovation, sustainability, and farmer success. Today, we serve agricultural communities across the country with our premium fertilizer solutions.
               </p>
               <p className="text-lg text-gray-600">
                 Our commitment to research and development ensures we stay at the cutting edge of agricultural science, continuously improving our formulations to meet the evolving needs of modern farming.
@@ -248,7 +248,7 @@ const AboutUs = () => {
           <div className="animate-on-scroll opacity-0 translate-y-10 transition-all duration-700 ease-out">
             <h2 className="text-3xl md:text-4xl font-bold mb-6">Join Us in Growing a Sustainable Future</h2>
             <p className="text-xl mb-8 max-w-3xl mx-auto">
-              Discover how our premium fertilizers can transform your farm's productivity while caring for the environment.
+              Discover how our premium fertilizers can transform your farm&aposs productivity while caring for the environment.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <button className="px-8 py-3 bg-white text-green-600 font-medium rounded-lg hover:bg-gray-100 transition-colors duration-300">

@@ -1,4 +1,5 @@
 // components/address/AddressCard.tsx
+"use client"
 import React from 'react';
 
 interface Address {

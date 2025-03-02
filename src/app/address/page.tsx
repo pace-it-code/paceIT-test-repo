@@ -63,7 +63,7 @@ const router = useRouter()
 
     setSaving(true);
     try {
-      const response = await axios.put("/api/address", { userId, address });
+       await axios.put("/api/address", { userId, address });
       alert("Address updated successfully!");
       router.push("/order")
       

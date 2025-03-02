@@ -188,7 +188,7 @@ const ContactPage: NextPage = () => {
                   </div>
                   <h3 className="text-2xl font-bold text-green-800 mb-2">Thank you for reaching out!</h3>
                   <p className="text-gray-600">
-                    We've received your message and will get back to you within 24-48 hours.
+                    We&aposve received your message and will get back to you within 24-48 hours.
                   </p>
                 </motion.div>
               ) : (
@@ -428,7 +428,7 @@ const ContactPage: NextPage = () => {
             >
               <div className="bg-green-700 text-white p-6">
                 <h3 className="text-xl font-bold mb-2">Get In Touch</h3>
-                <p className="text-green-100">We're here to answer your questions</p>
+                <p className="text-green-100">We&aposre here to answer your questions</p>
               </div>
               
               <div className="p-6">
