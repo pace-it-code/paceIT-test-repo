@@ -6,31 +6,28 @@ import { Product } from "../../types/types";
 export interface PricingOption {
   packageSize: string;
   price: number;
-  discount?: number; // Optional discount field
+  discount?: number;
 }
 
-// Extend Product to include discount field
 interface ExamProduct extends Product {
-  discount?: number; // Make discount optional
+  discount?: number;
 }
 
 export default function ProductCard({ product }: { product: ExamProduct }) {
   const [selectedPrice, setSelectedPrice] = useState<PricingOption | null>(null);
   const [coupon, setCoupon] = useState<{ code: string; discount: number } | null>(null);
+  const [isHovered, setIsHovered] = useState(false);
 
-  // Ensure at least one image exists, otherwise use a placeholder
   const productImage = product.images?.[0]
     ? product.images[0].replace('/upload/', '/upload/f_auto,q_auto/')
     : "/images.png";
 
-  // ✅ Set first package as default
   useEffect(() => {
     if (product?.pricing && product.pricing.length > 0) {
       setSelectedPrice(product.pricing[0]);
     }
   }, [product]);
 
-  // ✅ Fetch active coupon from Firebase API
   useEffect(() => {
     async function fetchCoupon() {
       try {
@@ -52,11 +49,10 @@ export default function ProductCard({ product }: { product: ExamProduct }) {
     fetchCoupon();
   }, []);
 
-  // ✅ Compute original price & discounted price
   const { originalPrice, discountedPrice, appliedDiscount } = useMemo(() => {
     if (!selectedPrice) return { originalPrice: "N/A", discountedPrice: "N/A", appliedDiscount: 0 };
 
-    const discountedPrice = Number(selectedPrice.price); // Price stored in Firestore
+    const discountedPrice = Number(selectedPrice.price);
     if (isNaN(discountedPrice)) {
       console.error("Invalid price value:", selectedPrice.price);
       return { originalPrice: "N/A", discountedPrice: "N/A", appliedDiscount: 0 };
@@ -64,70 +60,81 @@ export default function ProductCard({ product }: { product: ExamProduct }) {
 
     const discountFromCoupon = coupon?.discount ?? 0;
     const discountFromProduct = product.discount ?? 0;
-
-    // Use the highest discount (Coupon OR Product discount)
     const appliedDiscount = Math.max(discountFromCoupon, discountFromProduct);
-
-    // ✅ Calculate Original Price (discounted price + discount amount)
     const originalPrice = (discountedPrice + (discountedPrice * appliedDiscount / 100)).toFixed(2);
 
     return { originalPrice, discountedPrice: discountedPrice.toFixed(2), appliedDiscount };
   }, [selectedPrice, coupon, product.discount]);
 
   return (
-    <div className="p-4 border rounded shadow hover:shadow-md block bg-white">
+    <div 
+      className="overflow-hidden bg-white border border-gray-100 rounded-lg shadow-sm transition-all duration-200 hover:shadow-md"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
       <Link href={`/product/${product.id}`} className="block">
-        <div className="w-full h-36 md:h-48 relative rounded-md mb-2 overflow-hidden">
-          <Image
-            src={productImage}
-            alt={product.name}
-            fill
-            className="rounded-md object-contain"
-            priority
-          />
-        </div>
-
-        <h2 className="text-lg font-light text-greens text-center">{product.name}</h2>
-        <p className="text-warmbrown">{product.category}</p>
-      </Link>
-
-      {/* Pricing Options */}
-      <div className="mt-2">
-        <select
-          id="pricing"
-          name="pricing"
-          className="border p-2 w-full rounded-md"
-          value={selectedPrice?.packageSize || ""}
-          onChange={(e) => {
-            const selected = product.pricing?.find(
-              (p) => p.packageSize === e.target.value
-            );
-            if (selected) {
-              setSelectedPrice(selected);
-            }
-          }}
-        >
-          {product.pricing?.map((option, index) => (
-            <option key={index} value={option.packageSize}>
-              {option.packageSize}
-            </option>
-          ))}
-        </select>
-
-        {selectedPrice && (
-          <div className="mt-2">
-            <p className="text-gray-500 line-through">Original Price: ₹{originalPrice}</p>
-            <p className="font-semibold text-red-600">Discounted Price: ₹{discountedPrice}</p>
-            {appliedDiscount > 0 ? (
-              <p className="text-blue-500">
-                Discount Applied: {appliedDiscount}% Off ({coupon?.code ? `Coupon: ${coupon.code}` : "Product Discount"})
-              </p>
-            ) : (
-              <p className="text-gray-400">No discounts available</p>
-            )}
+        <div className="relative">
+          {appliedDiscount > 0 && (
+            <div className="absolute top-3 right-3 bg-red-500 text-white text-xs px-2 py-1 rounded-full z-10">
+              {appliedDiscount}% OFF
+            </div>
+          )}
+          <div className="mt-7 w-full h-52 relative overflow-hidden">
+            <Image
+              src={productImage}
+              alt={product.name}
+              fill
+              className={`object-contain transition-transform duration-700 ${isHovered ? 'scale-105' : 'scale-100'}`}
+              priority
+            />
           </div>
-        )}
-      </div>
+        </div>
+        
+        <div className="p-4">
+          <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">{product.category}</p>
+          <h2 className="text-lg font-medium text-gray-800 mb-3">{product.name}</h2>
+          
+          <select
+            id="pricing"
+            name="pricing"
+            className="w-full py-2 px-3 border border-gray-200 rounded text-sm bg-gray-50 focus:outline-none focus:ring-1 focus:ring-gray-400 transition-colors"
+            value={selectedPrice?.packageSize || ""}
+            onChange={(e) => {
+              const selected = product.pricing?.find(
+                (p) => p.packageSize === e.target.value
+              );
+              if (selected) {
+                setSelectedPrice(selected);
+              }
+            }}
+          >
+            {product.pricing?.map((option, index) => (
+              <option key={index} value={option.packageSize}>
+                {option.packageSize}
+              </option>
+            ))}
+          </select>
+
+          {selectedPrice && (
+            <div className="mt-3 flex items-end justify-between">
+              <div>
+                {appliedDiscount > 0 && (
+                  <span className="block text-gray-500 line-through text-xs">₹{originalPrice}</span>
+                )}
+                <span className="text-lg font-semibold text-gray-900">₹{discountedPrice}</span>
+              </div>
+              
+              <button className={`text-white text-sm px-4 py-2 rounded-md transition-all duration-300 ${
+                isHovered ? 'bg-emerald-600' : 'bg-emerald-500'
+              }`}>
+                Add to cart
+              </button>
+            </div>
+          )}
+          
+          
+        </div>
+      </Link>
     </div>
   );
 }

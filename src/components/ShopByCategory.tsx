@@ -1,61 +1,67 @@
 "use client";
 
 import React from "react";
-import Image from "next/image";
+import { motion } from "framer-motion";
 
-/**
- * This component can safely use onClick handlers
- * because it is a Client Component (thanks to "use client").
- */
 export default function ShopByCategory() {
+  const categories = [
+    {
+      id: 1,
+      name: "Organic Fertilizers",
+      lottieUrl:
+        "https://lottie.host/2e42d2f4-49bf-48bf-90f8-c03c70040ca1/RBzFXwM8hj.lottie",
+    },
+    {
+      id: 2,
+      name: "Chemical Fertilizers",
+      lottieUrl:
+        "https://lottie.host/21946a0f-3b96-45ec-9543-b08af0dc2e29/wrPM9v9CkM.lottie",
+    },
+    {
+      id: 3,
+      name: "Soil Amendments",
+      lottieUrl:
+        "https://lottie.host/f5e9be54-0190-4944-8f0b-a7605aa6d40d/Wjt2dl5B9I.lottie",
+    },
+  ];
+
   return (
-    <section className="py-10 bg-[#f9f9f9]">
-      <div className="container mx-auto text-center">
-        <h2 className="mb-8 text-2xl font-semibold">Shop By Category</h2>
-        <div className="flex flex-wrap justify-center gap-5">
-          {/* Category 1 */}
-          <div className="w-[150px] text-center">
-            <button
-              className="rounded-full w-24 h-24 mx-auto mb-2.5 object-cover"
-              onClick={() => alert("Category 1 clicked")}
-            >
-              <Image src="/cat.png" alt="Category 1" width={96} height={96} className="rounded-full object-cover" />
-            </button>
-            <p className="font-medium">Agriculture</p>
-          </div>
+    <section className="py-12 bg-gray-50">
+      <div className="container mx-auto px-4">
+        <h2 className="mb-10 text-2xl font-medium text-center text-gray-800">
+          Shop By Category
+        </h2>
 
-          {/* Category 2 */}
-          <div className="w-[150px] text-center">
-            <button
-              className="rounded-full w-24 h-24 mx-auto mb-2.5 object-cover"
-              onClick={() => alert("Category 2 clicked")}
+        <div className="flex flex-wrap justify-center gap-8 md:gap-16">
+          {categories.map((category) => (
+            <motion.button
+              key={category.id}
+              className="group flex flex-col items-center bg-white p-6 rounded-xl shadow-md transition-transform duration-300"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => alert(`${category.name} clicked`)}
             >
-              <Image src="/cat.png" alt="Category 2" width={96} height={96} className="rounded-full object-cover" />
-            </button>
-            <p className="font-medium">Organic</p>
-          </div>
-
-          {/* Category 3 */}
-          <div className="w-[150px] text-center">
-            <button
-              className="rounded-full w-24 h-24 mx-auto mb-2.5 object-cover"
-              onClick={() => alert("Category 3 clicked")}
-            >
-              <Image src="/cat.png" alt="Category 3" width={96} height={96} className="rounded-full object-cover" />
-            </button>
-            <p className="font-medium">Vegetables</p>
-          </div>
-
-          {/* Category 4 */}
-          <div className="w-[150px] text-center">
-            <button
-              className="rounded-full w-24 h-24 mx-auto mb-2.5 object-cover"
-              onClick={() => alert("Category 4 clicked")}
-            >
-              <Image src="/cat.png" alt="Category 4" width={96} height={96} className="rounded-full object-cover" />
-            </button>
-            <p className="font-medium">Fruits</p>
-          </div>
+              <div className="relative w-32 h-32 mb-4 overflow-hidden">
+                <div
+                  dangerouslySetInnerHTML={{
+                    __html: `
+                      <dotlottie-player
+                        src="${category.lottieUrl}"
+                        background="transparent"
+                        speed="1"
+                        style="width: 100%; height: 100%"
+                        loop
+                        autoplay
+                      ></dotlottie-player>
+                    `,
+                  }}
+                />
+              </div>
+              <p className="font-medium text-center text-gray-700">
+                {category.name}
+              </p>
+            </motion.button>
+          ))}
         </div>
       </div>
     </section>
