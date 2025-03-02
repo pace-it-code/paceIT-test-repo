@@ -8,7 +8,7 @@ export default function MobileMenu() {
         <Link href="/" className="flex items-center py-3 hover:bg-white/10 px-2 rounded-lg transition-colors">
           Home
         </Link>
-        <Link href="/products" className="flex items-center py-3 hover:bg-white/10 px-2 rounded-lg transition-colors">
+        <Link href="/product" className="flex items-center py-3 hover:bg-white/10 px-2 rounded-lg transition-colors">
           Products
         </Link>
         <Link href="/cart" className="flex items-center py-3 hover:bg-white/10 px-2 rounded-lg transition-colors">

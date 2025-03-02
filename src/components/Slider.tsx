@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useEffect, useState, useRef, useCallback } from "react";
-import Image from "next/image";
 import { ChevronLeft, ChevronRight, Leaf, Droplet, Shield, Sprout } from "lucide-react";
 
 const slides = [
@@ -15,19 +14,19 @@ const slides = [
     title: "Soil Revitalization",
     description: "Restore depleted soil with our balanced mineral formulations",
     icon: <Droplet className="w-16 h-16 text-blue-400" />,
-    bgColor: "bg-gradient-to-r from-blue-800 to-blue-600"
+    bgColor: "bg-gradient-to-r from-green-600 to-green-800"
   },
   {
     title: "Pest Protection",
     description: "Strengthen your plants' natural defenses against harmful pests",
     icon: <Shield className="w-16 h-16 text-amber-400" />,
-    bgColor: "bg-gradient-to-r from-amber-800 to-amber-600"
+    bgColor: "bg-gradient-to-r from-green-800 to-green-600"
   },
   {
     title: "Growth Accelerator",
     description: "See faster, healthier growth with our specialized formulas",
     icon: <Sprout className="w-16 h-16 text-emerald-400" />,
-    bgColor: "bg-gradient-to-r from-emerald-800 to-emerald-600"
+    bgColor: "bg-gradient-to-r from-green-600 to-green-800"
   }
 ];
 
