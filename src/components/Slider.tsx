@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useEffect, useState, useRef ,useCallback} from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
+import Image from "next/image";
 import { ChevronLeft, ChevronRight, Leaf, Droplet, Shield, Sprout } from "lucide-react";
 
 const slides = [
@@ -35,27 +36,25 @@ export default function HeroSlider() {
   const sliderRef = useRef<HTMLDivElement>(null);
   const autoplayRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  
-  
-  const stopAutoPlay = useCallback(() => {
-    if (autoplayRef.current !== null) {
-      clearInterval(autoplayRef.current);
-      autoplayRef.current = null;
-    }
-  }, []);
-
   const startAutoPlay = useCallback(() => {
     stopAutoPlay();
     autoplayRef.current = setInterval(() => {
       setCurrentIndex((prevIndex) => (prevIndex + 1) % slides.length);
     }, 6000);
-  }, [stopAutoPlay]);
+  }, []);
+
+  const stopAutoPlay = () => {
+    if (autoplayRef.current !== null) {
+      clearInterval(autoplayRef.current);
+      autoplayRef.current = null;
+    }
+  };
 
   useEffect(() => {
     startAutoPlay();
     return () => stopAutoPlay();
-  }, [startAutoPlay, stopAutoPlay]);
-  
+  }, [startAutoPlay]);
+
   const goToSlide = (index: number) => {
     setCurrentIndex(index);
     startAutoPlay();
@@ -72,54 +71,74 @@ export default function HeroSlider() {
   };
 
   return (
-    <section ref={sliderRef} className="relative w-full h-[60vh] overflow-hidden bg-gray-900">
-      <div className="absolute inset-0 w-full h-full">
-        {slides.map((slide, index) => (
-          <div
-            key={index}
-            className={`absolute inset-0 w-full h-full transition-opacity duration-1000 ease-in-out flex items-center justify-center ${
-              currentIndex === index ? "opacity-100 z-10" : "opacity-0 z-0"
-            } ${slide.bgColor}`}
-          >
-            <div className="relative z-10 max-w-6xl mx-auto px-8 grid md:grid-cols-2 gap-8 items-center">
-              <div className="text-white space-y-4">
-                <h2 className="text-3xl md:text-5xl font-bold">{slide.title}</h2>
-                <p className="text-base md:text-lg text-gray-100 max-w-md">{slide.description}</p>
-                <a href="#products" className="mt-2 px-5 py-2 bg-white text-gray-900 font-medium rounded-full hover:bg-opacity-90 transition-all inline-block">
-                  Explore Products
-                </a>
-              </div>
-              <div className="hidden md:flex justify-center items-center">
-                <div className="relative">
-                  <div className="absolute -inset-12 bg-white rounded-full opacity-10 animate-pulse"></div>
-                  <div className="relative bg-white bg-opacity-20 rounded-full p-8">
-                    {slide.icon}
+    <div className="mt-[118px] mb-12 mx-12">
+      <section 
+        ref={sliderRef} 
+        className="relative w-full h-[80vh] overflow-hidden rounded-2xl shadow-2xl"
+      >
+        <div className="absolute inset-0 w-full h-full">
+          {slides.map((slide, index) => (
+            <div
+              key={index}
+              className={`absolute inset-0 w-full h-full transition-all duration-1000 ease-in-out ${
+                currentIndex === index ? "opacity-100 z-10" : "opacity-0 z-0"
+              } ${slide.bgColor}`}
+            >
+              <div className="relative z-10 h-full w-full flex items-center justify-center">
+                <div className="w-full max-w-6xl mx-auto px-8 grid md:grid-cols-2 gap-12 items-center">
+                  <div className="text-white space-y-6">
+                    <h2 className="text-4xl md:text-6xl font-bold tracking-tight">{slide.title}</h2>
+                    <p className="text-lg md:text-xl text-gray-100 max-w-md leading-relaxed">{slide.description}</p>
+                    <a 
+                      href="#products" 
+                      className="mt-4 px-8 py-3 bg-white text-gray-900 font-medium rounded-full hover:bg-opacity-90 transition-all inline-flex items-center gap-2 hover:shadow-lg transform hover:-translate-y-1"
+                    >
+                      Explore Products
+                    </a>
+                  </div>
+                  <div className="hidden md:flex justify-center items-center">
+                    <div className="relative">
+                      <div className="absolute -inset-16 bg-white rounded-full opacity-10 animate-pulse"></div>
+                      <div className="relative bg-white bg-opacity-20 backdrop-blur-sm rounded-full p-12 shadow-inner">
+                        {slide.icon}
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
-        ))}
-      </div>
-
-      <button onClick={prevSlide} className="hidden md:block absolute top-1/2 left-6 -translate-y-1/2 bg-white/20 hover:bg-white/30 p-3 rounded-full text-white">
-        <ChevronLeft className="w-6 h-6" />
-      </button>
-      <button onClick={nextSlide} className="hidden md:block absolute top-1/2 right-6 -translate-y-1/2 bg-white/20 hover:bg-white/30 p-3 rounded-full text-white">
-        <ChevronRight className="w-6 h-6" />
-      </button>
-
-      <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-2">
-        {slides.map((_, index) => (
-          <button
-            key={index}
-            onClick={() => goToSlide(index)}
-            className={`w-2 h-2 md:w-3 md:h-3 rounded-full transition-all ${
-              currentIndex === index ? "bg-white w-6 md:w-8" : "bg-white/40 hover:bg-white/60"
-            }`}
-          />
-        ))}
-      </div>
-    </section>
+          ))}
+        </div>
+        
+        <button 
+          onClick={prevSlide}
+          className="absolute left-4 top-1/2 -translate-y-1/2 z-20 bg-white bg-opacity-20 backdrop-blur-sm hover:bg-opacity-30 text-white p-3 rounded-full shadow-lg transform transition-transform hover:scale-110"
+        >
+          <ChevronLeft className="w-6 h-6" />
+        </button>
+        
+        <button 
+          onClick={nextSlide}
+          className="absolute right-4 top-1/2 -translate-y-1/2 z-20 bg-white bg-opacity-20 backdrop-blur-sm hover:bg-opacity-30 text-white p-3 rounded-full shadow-lg transform transition-transform hover:scale-110"
+        >
+          <ChevronRight className="w-6 h-6" />
+        </button>
+        
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex space-x-3">
+          {slides.map((_, index) => (
+            <button
+              key={index}
+              onClick={() => goToSlide(index)}
+              className={`w-3 h-3 rounded-full transition-all ${
+                currentIndex === index 
+                  ? "bg-white w-8" 
+                  : "bg-white bg-opacity-50 hover:bg-opacity-75"
+              }`}
+              aria-label={`Go to slide ${index + 1}`}
+            />
+          ))}
+        </div>
+      </section>
+    </div>
   );
 }
