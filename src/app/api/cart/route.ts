@@ -93,7 +93,7 @@ export async function DELETE(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const userId = searchParams.get("userId");
     const productId = searchParams.get("productId");
-
+    const packageSize = searchParams.get("packageSize")
     if (!userId || !productId) {
       return NextResponse.json({ success: false, error: "User ID and Product ID are required" }, { status: 400 });
     }
@@ -106,7 +106,7 @@ export async function DELETE(req: NextRequest) {
     }
 
     const userData = userSnap.data() as User;
-    const updatedCart = userData.cart.filter(item => item.productId !== productId);
+    const updatedCart = userData.cart.filter(item => !(item.productId === productId && item.packageSize === packageSize));
 
     await updateDoc(userRef, { cart: updatedCart });
 

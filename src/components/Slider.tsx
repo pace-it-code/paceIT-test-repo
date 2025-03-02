@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState, useRef, useCallback } from "react";
-import Image from "next/image";
+
 import { ChevronLeft, ChevronRight, Leaf, Droplet, Shield, Sprout } from "lucide-react";
 
 const slides = [
