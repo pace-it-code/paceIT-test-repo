@@ -2,9 +2,10 @@
 "use client"
 import "./globals.css";
 import { useEffect } from "react";
-import { Providers } from "./providers";
+
 import Navbar from "@/components/Navbar";
 import Footer from "../components/Footer";
+import { CouponProvider } from "./context/CouponContext";
 
 export default function RootLayout({
   children,
@@ -38,14 +39,14 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <Navbar />
-        <Providers>
+        <CouponProvider>
           {/* Google Translate Dropdown (Hidden) */}
           <div id="google_translate_element" style={{ display: "none" }}></div>
 
           {children}
 
           <Footer />
-        </Providers>
+        </CouponProvider>
       </body>
     </html>
   );

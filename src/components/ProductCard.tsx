@@ -1,8 +1,11 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useState, useEffect, useMemo } from "react";
+import { useRouter } from "next/navigation";
 import { Product } from "../../types/types";
 import api from "../app/utils/api"; // Import API utility
+import { useCoupon } from "@/app/context/CouponContext";
+
 
 export interface PricingOption {
   packageSize: string;
@@ -14,22 +17,23 @@ interface ExamProduct extends Product {
   discount?: number;
 }
 
+
 export default function ProductCard({ product }: { product: ExamProduct }) {
+  const router = useRouter()
+  const { coupon } = useCoupon();
   const [selectedPrice, setSelectedPrice] = useState<PricingOption | null>(null);
-  const [coupon, setCoupon] = useState<{ code: string; discount: number } | null>(null);
   const [isHovered, setIsHovered] = useState(false);
-  const [userId, setUserId] = useState<string>("");
+  const [userId, setUserId] = useState<string>('');
 
-
-  // Get product image
+  // Get product images
   const productImage = product.images?.[0]
     ? product.images[0].replace('/upload/', '/upload/f_auto,q_auto/')
-    : "/images.png";
+    : '/images.png';
 
   // Load userId from localStorage
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      const storedUserId = localStorage.getItem("userId") || "";
+    if (typeof window !== 'undefined') {
+      const storedUserId = localStorage.getItem('userId') || '';
       setUserId(storedUserId);
     }
   }, []);
@@ -41,87 +45,59 @@ export default function ProductCard({ product }: { product: ExamProduct }) {
     }
   }, [product]);
 
-  // Fetch available coupons
-  
-  useEffect(() => {
-    async function fetchCoupon() {
-      // ✅ Check if coupon is already stored in sessionStorage
-      const storedCoupon = sessionStorage.getItem("coupon");
-      if (storedCoupon) {
-        setCoupon(JSON.parse(storedCoupon)); // ✅ Use cached coupon
-        return;
-      }
-
-      try {
-        const res = await fetch(`/api/coupon`);
-        if (!res.ok) throw new Error(`API responded with status: ${res.status}`);
-
-        const data = await res.json();
-        if (data && typeof data.discount === "number" && data.discount > 0) {
-          setCoupon({ code: data.code, discount: data.discount });
-          sessionStorage.setItem("coupon", JSON.stringify({ code: data.code, discount: data.discount })); // ✅ Store in session
-        } else {
-          setCoupon(null);
-        }
-      } catch (error) {
-        console.error("Error fetching coupon:", error);
-        setCoupon(null);
-      }
-    }
-
-    fetchCoupon();
-  }, []); // ✅ Runs only on in
-
   // Calculate price & discount
   const { originalPrice, discountedPrice, appliedDiscount } = useMemo(() => {
-    if (!selectedPrice) return { originalPrice: "N/A", discountedPrice: "N/A", appliedDiscount: 0 };
+    if (!selectedPrice) return { originalPrice: 'N/A', discountedPrice: 'N/A', appliedDiscount: 0 };
 
     const discountedPrice = Number(selectedPrice.price);
     if (isNaN(discountedPrice)) {
-      console.error("Invalid price value:", selectedPrice.price);
-      return { originalPrice: "N/A", discountedPrice: "N/A", appliedDiscount: 0 };
+      console.error('Invalid price value:', selectedPrice.price);
+      return { originalPrice: 'N/A', discountedPrice: 'N/A', appliedDiscount: 0 };
     }
 
     const discountFromCoupon = coupon?.discount ?? 0;
     const discountFromProduct = product.discount ?? 0;
     const appliedDiscount = Math.max(discountFromCoupon, discountFromProduct);
-    const originalPrice = (discountedPrice + (discountedPrice * appliedDiscount / 100)).toFixed(2);
+    const originalPrice = (discountedPrice + (discountedPrice * appliedDiscount) / 100).toFixed(2);
 
     return { originalPrice, discountedPrice: discountedPrice.toFixed(2), appliedDiscount };
   }, [selectedPrice, coupon, product.discount]);
 
-  // ✅ Add item to cart
+  // Add item to cart
   const addToCart = async (e: React.MouseEvent) => {
     e.stopPropagation(); // Prevent unwanted navigation
-    e.preventDefault();  // Prevent page reload
-  
+    e.preventDefault(); // Prevent page reload
+
     if (!userId) {
-      alert("User ID not found. Please log in.");
+      alert(' Please log in.');
+      router.push("/auth")
+      
       return;
     }
     if (!selectedPrice) {
-      alert("Please select a package size.");
+      alert('Please select a package size.');
       return;
     }
-  
+
     try {
-      const response = await api.put("/cart", {
+      const response = await api.put('/cart', {
         userId,
         productId: product.id,
-        quantity: 1, // ✅ Always stores quantity as 1
+        quantity: 1, // Always stores quantity as 1
         packageSize: selectedPrice.packageSize,
       });
-  
+
       if (response.data.success) {
-        alert("✅ Product added to cart!");
+        alert('✅ Product added to cart!');
       } else {
-        alert("❌ Failed to add to cart.");
+        alert('❌ Failed to add to cart.');
       }
     } catch (err) {
-      console.error("Error adding to cart:", err);
-      alert("❌ Error adding to cart. Please try again.");
+      console.error('Error adding to cart:', err);
+      alert('❌ Error adding to cart. Please try again.');
     }
   };
+
   
   return (
     <div 
