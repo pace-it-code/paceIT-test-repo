@@ -22,7 +22,8 @@
       composition: string;        // Composition / Technical details
       commonlyUsedFor: string[];  // List of crops commonly used for (e.g., ['corn', 'soybean', 'cereals', 'pulses', 'rice'])
       avoidForCrops: string[]; 
-      search?:string;   // Crops to avoid usage (e.g., ['wheat', 'hybrid seed'])
+      search?:string;
+      keywords?:string[];  // Crops to avoid usage (e.g., ['wheat', 'hybrid seed'])
       dosage: {
         method: string;           // Dosage method (e.g., 'Mix with water and rub on seeds')
         dosage:{dose:string,acre:string}

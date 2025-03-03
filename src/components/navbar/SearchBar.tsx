@@ -1,4 +1,3 @@
-// components/navbar/SearchBar.tsx
 "use client";
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -14,11 +13,12 @@ export default function SearchBar() {
   const searchRef = useRef<HTMLDivElement>(null);
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [isSearching, setIsSearching] = useState(false); // ✅ Loading state
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
   };
-  
+
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
@@ -27,18 +27,20 @@ export default function SearchBar() {
   };
 
   const handleProductSelect = (productId: string) => {
-    if (!productId) return; // Prevent errors if ID is missing
-    console.log(`✅ Manually Redirecting to: /product/${productId}`);
-    window.location.href = `/product/${productId}`;
+    if (!productId) return;
+    console.log(`✅ Redirecting to: /product/${productId}`);
+    router.push(`/product/${productId}`);
   };
 
-  // Handle search results
+  // Fetch search results using the updated API
   useEffect(() => {
     const fetchSearchResults = async () => {
       if (searchQuery.trim().length < 2) {
         setSearchResults([]);
         return;
       }
+
+      setIsSearching(true);
 
       try {
         const response = await fetch(`/api/search?q=${encodeURIComponent(searchQuery)}`);
@@ -47,18 +49,18 @@ export default function SearchBar() {
         const data = await response.json();
         setSearchResults(data.data || []);
         console.log("🔍 API Response:", data);
-        
-        // No automatic redirect - removed the auto-redirect code that was here
       } catch (error) {
         console.error("❌ Error fetching search results:", error);
         setSearchResults([]);
+      } finally {
+        setIsSearching(false);
       }
     };
 
-    const delay = setTimeout(fetchSearchResults, 300);
+    const delay = setTimeout(fetchSearchResults, 300); // ✅ Debounce API calls
     return () => clearTimeout(delay);
   }, [searchQuery]);
-  
+
   // Close search results when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -90,17 +92,23 @@ export default function SearchBar() {
       </form>
       
       {/* Search Suggestions Dropdown */}
-      {searchResults.length > 0 && (
+      {searchQuery.length >= 2 && (
         <div className="absolute top-full left-0 w-full bg-white shadow-md rounded-md mt-2 z-50">
-          {searchResults.map((product) => (
-            <button 
-              key={product.id} 
-              onClick={() => handleProductSelect(product.id)} 
-              className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-gray-900 border-b border-gray-100 last:border-0"
-            >
-              <span className="font-medium">{product.name}</span>
-            </button>
-          ))}
+          {isSearching ? (
+            <div className="p-4 text-gray-500 text-center">Searching...</div>
+          ) : searchResults.length > 0 ? (
+            searchResults.map((product) => (
+              <button 
+                key={product.id} 
+                onClick={() => handleProductSelect(product.id)} 
+                className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-gray-900 border-b border-gray-100 last:border-0"
+              >
+                <span className="font-medium">{product.name}</span>
+              </button>
+            ))
+          ) : (
+            <div className="p-4 text-gray-500 text-center">No results found</div>
+          )}
         </div>
       )}
     </div>

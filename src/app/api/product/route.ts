@@ -8,6 +8,21 @@ import cloudinary from '../../../../utils/cloudinary';
 
 
 
+
+// Function to generate search keywords
+function generateKeywords(name: string): string[] {
+  const keywords: Set<string> = new Set();
+  const processedName = name.toLowerCase().replace(/\s+/g, ""); // Normalize input
+
+  for (let i = 0; i < processedName.length; i++) {
+    for (let j = i + 1; j <= processedName.length; j++) {
+      keywords.add(processedName.substring(i, j));
+    }
+  }
+
+  return Array.from(keywords);
+}
+
 export async function POST(req: NextRequest) {
   try {
     const formData = await req.formData();
@@ -52,7 +67,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: false, error: "Missing required fields" }, { status: 400 });
     }
 
-    const search = name.toLowerCase().replace(/\s+/g, "");
+    const search = name.toLowerCase().replace(/\s+/g, ""); 
+    const keywords = generateKeywords(name); // ✅ Generate keywords dynamically
+
     // Upload images to Cloudinary
     const uploadedImageUrls: string[] = [];
     for (const image of images) {
@@ -60,20 +77,18 @@ export async function POST(req: NextRequest) {
       const base64Image = Buffer.from(buffer).toString("base64");
       const uploadResponse = await cloudinary.uploader.upload(`data:${image.type};base64,${base64Image}`, {
         folder: "products",
-        format: "jpg", // ✅ Force convert to JPG
+        format: "jpg", // ✅ Convert to JPG for consistency
         transformation: [
-          { quality: "auto" }, // Auto-optimizes image quality
-          { fetch_format: "jpg" }, // Ensures JPG format
+          { quality: "auto" },
+          { fetch_format: "jpg" },
         ],
       });
-      
       uploadedImageUrls.push(uploadResponse.secure_url);
     }
 
     // Creating product object
     const newProduct = {
       name,
-      
       description,
       category,
       images: uploadedImageUrls,
@@ -82,7 +97,8 @@ export async function POST(req: NextRequest) {
       composition,
       commonlyUsedFor,
       avoidForCrops,
-      search,
+      search, 
+      keywords, // ✅ Add searchable keywords
       pricing,
       dosage: {
         method,
