@@ -258,7 +258,7 @@ export default function CartPage() {
                     {itemCount} Items
                   </p>
                   <p className="font-semibold text-xl text-indigo-600">
-                   ₹{itemsTotal.toFixed(2)}
+                  ₹{itemsTotal.toFixed(2)}
                   </p>
                 </div>
                 <button

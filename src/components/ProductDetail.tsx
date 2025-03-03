@@ -3,13 +3,12 @@ import { useQuantity } from "../app/hooks/useQuantity";
 import { useUserId } from "../app/hooks/useId";
 import { Product } from "../../types/types";
 import api from "../app/utils/api"; 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 interface PricingOption {
   packageSize: string;
   price: number;
 }
-
 
 interface ProductDetailsProps {
   product: Product;
@@ -22,10 +21,17 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
   const userId = useUserId();
   const router = useRouter();
 
+  // Set the first package size and price as default on component mount
+  useEffect(() => {
+    if (product && product.pricing && product.pricing.length > 0) {
+      setSelectedPrice(product.pricing[0]);
+    }
+  }, [product]);
+
   const addToCart = async () => {
     if (!product || quantity < 1 || !selectedPrice) return;
     setAdding(true);
-
+    
     try {
       await api.put("/cart", {
         userId,
@@ -62,6 +68,7 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
           id="packageSize"
           name="packageSize"
           className="border p-2 w-full rounded-md mb-4"
+          value={selectedPrice?.packageSize || ""}
           onChange={(e) => {
             const selected = product.pricing.find(
               (p) => p.packageSize === e.target.value
@@ -69,7 +76,6 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
             setSelectedPrice(selected || null);
           }}
         >
-          <option value="">Choose a size</option>
           {product.pricing.map((option, index) => (
             <option key={index} value={option.packageSize}>
               {option.packageSize}
@@ -100,7 +106,7 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
           className={`w-full bg-yellow-500 text-white py-2 rounded-md font-semibold ${
             adding ? "opacity-50 cursor-not-allowed" : ""
           }`}
-          disabled={adding}
+          disabled={adding || !selectedPrice}
         >
           {adding ? "Adding..." : "🛒 Add to Cart"}
         </button>

@@ -19,7 +19,7 @@ interface CartSummaryProps {
 
 export const CartSummary: React.FC<CartSummaryProps> = ({ cart }) => {
   // Example shipping cost (adjust or fetch from backend as needed)
-  const shippingCost = 49;
+  const shippingCost = 0;
   const subtotal = cart.reduce((acc, item) => acc + item.price * item.quantity, 0);
   const total = subtotal + shippingCost;
 

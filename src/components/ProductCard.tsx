@@ -24,6 +24,7 @@ export default function ProductCard({ product }: { product: ExamProduct }) {
   const [selectedPrice, setSelectedPrice] = useState<PricingOption | null>(null);
   const [isHovered, setIsHovered] = useState(false);
   const [userId, setUserId] = useState<string>('');
+  
 
   // Get product images
   const productImage = product.images?.[0]
