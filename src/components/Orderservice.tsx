@@ -134,6 +134,13 @@ export const initializeRazorpayPayment = (
     prefill: { contact: address.phone },
     theme: { color: "#3399cc" },
     handler: onSuccess,
+    modal: {
+      ondismiss: () => {
+        // Actions to perform when the modal is dismissed
+        alert('Payment was not completed. The page will now refresh for you to retry.');
+        window.location.reload(); // Refresh the page
+      }
+    }
   };
 
   const payment = new (window ).Razorpay(paymentData);
