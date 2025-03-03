@@ -7,26 +7,26 @@ const slides = [
   {
     title: "Organic Plant Nutrition",
     description: "Enhance your garden with our eco-friendly nutrient-rich fertilizers",
-    icon: <Leaf className="w-16 h-16 text-green-400" />,
-    bgColor: "bg-gradient-to-r from-green-800 to-green-600"
+    icon: <Leaf className="w-16 h-16 text-lime-400" />,
+    bgColor: "bg-gradient-to-b from-green-700 to-teal-400 "
   },
   {
     title: "Soil Revitalization",
     description: "Restore depleted soil with our balanced mineral formulations",
-    icon: <Droplet className="w-16 h-16 text-blue-400" />,
-    bgColor: "bg-gradient-to-r from-green-600 to-green-800"
+    icon: <Droplet className="w-16 h-16 text-teal-300" />,
+    bgColor: "bg-gradient-to-b from-teal-400 to-green-700"
   },
   {
     title: "Pest Protection",
     description: "Strengthen your plants' natural defenses against harmful pests",
-    icon: <Shield className="w-16 h-16 text-amber-400" />,
-    bgColor: "bg-gradient-to-r from-green-800 to-green-600"
+    icon: <Shield className="w-16 h-16 text-amber-300" />,
+    bgColor: "bg-gradient-to-b from-green-700 to-teal-400"
   },
   {
     title: "Growth Accelerator",
     description: "See faster, healthier growth with our specialized formulas",
-    icon: <Sprout className="w-16 h-16 text-emerald-400" />,
-    bgColor: "bg-gradient-to-r from-green-600 to-green-800"
+    icon: <Sprout className="w-16 h-16 text-emerald-300" />,
+    bgColor: "bg-gradient-to-b from-teal-400 to-green-700"
   }
 ];
 
@@ -70,11 +70,8 @@ export default function HeroSlider() {
   };
 
   return (
-    <div className="mt-[118px] mb-12 mx-12">
-      <section 
-        ref={sliderRef} 
-        className="relative w-full h-[80vh] overflow-hidden rounded-2xl shadow-2xl"
-      >
+    <div className="mt-[40px] mb-12 mx-12">
+      <section ref={sliderRef} className="relative w-full h-[80vh] overflow-hidden rounded-2xl shadow-2xl">
         <div className="absolute inset-0 w-full h-full">
           {slides.map((slide, index) => (
             <div

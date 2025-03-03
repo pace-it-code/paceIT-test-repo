@@ -1,7 +1,6 @@
 // components/navbar/Navbar.tsx
 "use client";
 import { useState, useEffect } from "react";
-
 import { Menu, X } from "lucide-react";
 import NavLogo from "../components/navbar/NavLogo";
 import DesktopNavLinks from "../components/navbar/DesktopNavLinks";
@@ -28,15 +27,15 @@ export default function Navbar() {
 
   return (
     <>
-      <nav 
-        className={`fixed top-0 left-0 right-0 bg-greens z-50 transition-all duration-300 ${
-          scrolled ? "py-2 shadow-lg" : "py-4"
-        }`}
+      <nav
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+          scrolled ? "bg-emerald-900 py-2 shadow-lg" : "bg-emerald-800 py-4"
+        } text-white`}
       >
         <div className="max-w-7xl mx-auto px-4 flex items-center justify-between">
           {/* Mobile Menu Button */}
-          <button 
-            className="md:hidden text-white bg-white/10 p-2 rounded-full hover:bg-white/20 transition-colors" 
+          <button
+            className="md:hidden text-white bg-white/20 p-2 rounded-full hover:bg-white/30 transition-colors"
             onClick={toggleMenu}
             aria-label="Toggle menu"
           >
@@ -63,7 +62,7 @@ export default function Navbar() {
         {isMenuOpen && <MobileMenu />}
       </nav>
 
-      {/* This one line below pushes the main content below the fixed navbar */}
+      {/* Pushes the main content below the fixed navbar */}
       <div className="h-20" />
     </>
   );
