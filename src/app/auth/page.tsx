@@ -4,11 +4,13 @@ import PhoneAuth from "@/components/PhoneAuth";
 
 export default function Home() {
   return (
-    <div>
+    <div className="flex flex-col items-center gap-4">
       <h1>Home</h1>
       <PhoneAuth />
-      <LoginButton />
-      <LogoutButton />
+      <div className="flex gap-4">
+        <LoginButton />
+        <LogoutButton />
+      </div>
     </div>
   );
 }

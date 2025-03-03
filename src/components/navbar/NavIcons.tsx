@@ -162,6 +162,8 @@ export default function NavIcons() {
               </li>
               <li className="hover:bg-gray-50 transition-colors">
                 <Link href="/orders" className="block px-4 py-2 text-gray-800">Orders</Link>
+              </li><li className="hover:bg-gray-50 transition-colors">
+                <Link href="/auth" className="block px-4 py-2 text-gray-800">Login</Link>
               </li>
               <li className="hover:bg-gray-50 transition-colors border-t border-gray-100">
                 <button 
