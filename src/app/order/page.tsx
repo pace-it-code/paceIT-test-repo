@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useCart } from "../hooks/useCart";
 import { useUserId } from "../hooks/useId";
 import Script from "next/script";
+import { Address } from "../../../types/types";
 
 import { AddressCard } from "../../components/Addresscard";
 import { CartSummary, calculateCartTotal } from "../../components/Cartsummary";
@@ -21,16 +22,7 @@ import {
   initializeRazorpayPayment,
 } from "../../components/Orderservice";
 
-interface Address {
-  id: string;
-  name: string;
-  line1: string;
-  line2?: string;
-  state: string;
-  city: string;
-  zip: string;
-  phone: string;
-}
+
 
 interface RazorpayResponse {
   razorpay_order_id: string;

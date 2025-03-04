@@ -2,21 +2,13 @@
 "use client"
 
 import axios from 'axios';
+import { Address } from '../../types/types';
 
 
 import { PaymentMethod } from '../components/Payementmethod';
 
 
-interface Address {
-  id: string;
-  name: string;
-  line1: string;
-  line2?: string;
-  state: string;
-  city: string;
-  zip: string;
-  phone: string;
-}
+
 declare global {
     interface Window {
       Razorpay: new (options: RazorpayOptions) => RazorpayInstance;

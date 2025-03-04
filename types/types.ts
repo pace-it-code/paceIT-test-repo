@@ -46,17 +46,32 @@
       address: Address[];
       cart: CartItem[];   // Array of Cart Items
     }
+     export interface ProductFormData {
+      name: string;
+      description: string;
+      category: string;
+      manufacturer: string;
+      composition: string;
+      commonlyUsedFor: string[];
+      avoidForCrops: string[];
+      benefits: string[];
+      method: string;
+      dosage: { dose: string; arce: string }[];
+      pricing: { packageSize: string; price: number }[];
+      images: File[];
+    }
     
   
     export interface CartItem {
-      productId: string; // ID of the product in the cart
-      quantity: number;  // Number of items added
-      price: number;     // Price at the time of adding
-      name: string;      // Product name (to avoid extra Firestore reads)
-      image: string;     // Main product image
-      packageSize: string; // Selected package size
-      addedAt: string;   // Timestamp when added to cart
+      name: string;
+      productId?: string;
+      images?: string | string[];
+      packageSize?: string;
+      quantity: number;
+      price: number;
+      addedAt: string | number | Date;
     }
+    
   
   export interface Order {
     id: string;         // Firestore-generated Order ID
@@ -86,13 +101,12 @@
     createdAt: string;  // Timestamp of review submission
   }
   
-  export interface Address{
-
-    id:string,
+  export interface Address {
     name:string,
-    line1:string,
-    line2?:string,
-    state:string,
-    city:string,
-    zip:string
-  }
+    line1: string;
+    line2?: string;
+    state: string;
+    city: string;
+    zip: string;
+    phone: string;
+}  

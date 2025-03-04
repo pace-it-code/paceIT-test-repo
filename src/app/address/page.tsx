@@ -2,17 +2,10 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useUserId } from "../hooks/useId"; // Custom hook to get userId
+import { Address } from "../../../types/types";
 import axios from "axios";
 
-interface Address {
-  name:string,
-  line1: string;
-  line2?: string;
-  state: string;
-  city: string;
-  zip: string;
-  phone: string;
-}
+
 
 export default function AddressPage() {
 const router = useRouter()

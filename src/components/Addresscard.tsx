@@ -1,17 +1,8 @@
 // components/address/AddressCard.tsx
 "use client"
 import React from 'react';
+import { Address } from '../../types/types';
 
-interface Address {
-  id: string;
-  name: string;
-  line1: string;
-  line2?: string;
-  state: string;
-  city: string;
-  zip: string;
-  phone: string;
-}
 
 interface AddressCardProps {
   address: Address;

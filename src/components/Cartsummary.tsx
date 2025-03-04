@@ -2,17 +2,7 @@
 
 import React from "react";
 import { v4 as uuidv4 } from "uuid";
-
-export interface CartItem {
-  name: string;
-  productId?: string;
-  images?: string | string[];
-  packageSize?: string;
-  quantity: number;
-  price: number;
-  addedAt: string | number | Date;
-}
-
+import { CartItem } from "../../types/types";
 interface CartSummaryProps {
   cart: CartItem[];
 }

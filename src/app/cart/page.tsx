@@ -4,6 +4,7 @@ import { useEffect, useState, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import api from "../utils/api";
+// import { CartItem } from '../../../types/types';
 
 export interface CartItem {
   productId: string;
