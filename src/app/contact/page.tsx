@@ -428,7 +428,7 @@ const ContactPage: NextPage = () => {
             >
               <div className="bg-green-700 text-white p-6">
                 <h3 className="text-xl font-bold mb-2">Get In Touch</h3>
-                <p className="text-green-100">We&aposre here to answer your questions</p>
+                <p className="text-green-100">We are here to answer your questions</p>
               </div>
               
               <div className="p-6">
@@ -441,7 +441,7 @@ const ContactPage: NextPage = () => {
                   </div>
                   <div>
                     <h4 className="text-gray-700 font-medium mb-1">Location</h4>
-                    <p className="text-gray-600">123 Farmland Road<br />Rural County, State 12345</p>
+                    <p className="text-gray-600">358 , Ghantaghar Marg, ghanthagahr <br />Katni,Madhya Pradesh, 483501</p>
                   </div>
                 </div>
                 
@@ -453,7 +453,7 @@ const ContactPage: NextPage = () => {
                   </div>
                   <div>
                     <h4 className="text-gray-700 font-medium mb-1">Phone</h4>
-                    <p className="text-gray-600">(555) 123-4567</p>
+                    <p className="text-gray-600">(+91) 9109109866</p>
                   </div>
                 </div>
                 
@@ -465,7 +465,7 @@ const ContactPage: NextPage = () => {
                   </div>
                   <div>
                     <h4 className="text-gray-700 font-medium mb-1">Email</h4>
-                    <p className="text-gray-600">info@youragriculturewebsite.com</p>
+                    <p className="text-gray-600">guptatradingcompny910@gmail.com</p>
                   </div>
                 </div>
                 
@@ -477,7 +477,7 @@ const ContactPage: NextPage = () => {
                   </div>
                   <div>
                     <h4 className="text-gray-700 font-medium mb-1">Hours</h4>
-                    <p className="text-gray-600">Monday - Friday: 8:00 AM - 5:00 PM<br />Saturday: 9:00 AM - 1:00 PM<br />Sunday: Closed</p>
+                    <p className="text-gray-600">Monday - Saturday: 11:00 AM - 8:00 PM Sunday: Closed</p>
                   </div>
                 </div>
                 

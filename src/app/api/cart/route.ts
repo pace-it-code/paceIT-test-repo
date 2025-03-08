@@ -1,3 +1,5 @@
+export const runtime = 'nodejs';
+
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '../../../../utils/firebase';
 import { getDoc, doc, updateDoc } from 'firebase/firestore';
@@ -36,7 +38,7 @@ export async function PUT(req: NextRequest) {
       quantity: Number(quantity),
       price: selectedPackage?.price ?? 0,
       name: productData.name ?? "Unnamed Product",
-      image: productData.images?.[0] ?? "/placeholder.png",
+      images: productData.images?.[0] ?? "/placeholder.png", // Changed from "image" to "images"
       packageSize: selectedPackage?.packageSize ?? "Default Size",
       addedAt: new Date().toISOString(),
     };
@@ -48,7 +50,6 @@ export async function PUT(req: NextRequest) {
       (item: CartItem) => item.productId === productId && item.packageSize === packageSize
     );
     
-
     if (existingItemIndex !== -1) {
       cart[existingItemIndex] = updatedCartItem;
     } else {
@@ -93,7 +94,8 @@ export async function DELETE(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const userId = searchParams.get("userId");
     const productId = searchParams.get("productId");
-    const packageSize = searchParams.get("packageSize")
+    const packageSize = searchParams.get("packageSize");
+    
     if (!userId || !productId) {
       return NextResponse.json({ success: false, error: "User ID and Product ID are required" }, { status: 400 });
     }
@@ -111,7 +113,6 @@ export async function DELETE(req: NextRequest) {
     await updateDoc(userRef, { cart: updatedCart });
 
     return NextResponse.json({ success: true, message: "Cart item removed successfully", data: updatedCart });
-
   } catch (error) {
     console.error("Error removing cart item:", error);
     return NextResponse.json({ success: false, error: "Internal Server Error" }, { status: 500 });
