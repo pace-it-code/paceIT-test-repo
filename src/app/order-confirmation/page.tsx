@@ -30,7 +30,7 @@ function OrderConfirmationContent() {
                         Error: No Order ID Found. Please contact support.
                     </p>
                 )}
-                <Link href="/order" className="mt-8 inline-block bg-green-500 text-white px-6 py-3 rounded-md shadow hover:bg-green-600 transition">
+                <Link href="/orders" className="mt-8 inline-block bg-green-500 text-white px-6 py-3 rounded-md shadow hover:bg-green-600 transition">
                     View Your Orders
                 </Link>
             </div>

@@ -79,6 +79,7 @@
     items: CartItem[];  // Array of ordered items
     totalAmount: number;// Total price of the order
     status: "pending" | "processing" | "shipped" | "delivered"; // Order status
+    shiprocketTrackingId?: string;
     createdAt: string;  // Timestamp of order creation
   }
   

@@ -8,106 +8,151 @@ import {
   where,
   query,
   getDocs,
+  updateDoc,
 } from "firebase/firestore";
+import axios from "axios"; 
 import { Order } from "../../../../types/types";
 
+const SHIPROCKET_TOKEN = process.env.SHIPROCKET_API_TOKEN;
+
+// ✅ Fetch Shiprocket Tracking ID
+async function getTrackingId(orderId: string) {
+    try {
+        const response = await axios.get(
+            `https://apiv2.shiprocket.in/v1/external/orders/show/${orderId}`,
+            {
+                headers: { Authorization: `Bearer ${SHIPROCKET_TOKEN}` },
+            }
+        );
+
+        return response.data?.shipment?.[0]?.awb_code || null;
+    } catch (error) {
+        console.error("Error fetching Shiprocket tracking ID:", error);
+        return null;
+    }
+}
+
+// ✅ Create Order & Store Tracking ID in Firestore
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { userId } = body;
+    const { userId, shippingDetails } = body; 
 
     if (!userId) {
-      return NextResponse.json(
-        { success: false, error: "User ID is required" },
-        { status: 400 }
-      );
+      return NextResponse.json({ success: false, error: "User ID is required" }, { status: 400 });
     }
 
-    // Get user document
+    // ✅ Fetch user data from Firestore
     const userRef = doc(db, "users", userId);
     const userSnap = await getDoc(userRef);
 
     if (!userSnap.exists()) {
-      return NextResponse.json(
-        { success: false, error: "User not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ success: false, error: "User not found" }, { status: 404 });
     }
 
-    // Get cart items from user data
     const userData = userSnap.data();
     const cartItems = userData?.cart || [];
 
     if (cartItems.length === 0) {
-      return NextResponse.json(
-        { success: false, error: "Cart is empty" },
-        { status: 400 }
-      );
+      return NextResponse.json({ success: false, error: "Cart is empty" }, { status: 400 });
     }
 
-    // Fetch product prices from Firestore
+    // ✅ Calculate Total Amount
     let totalAmount = 0;
-    const updatedCartItems = await Promise.all(
-      cartItems.map(
-        async (item: { productId: string; quantity: number }) => {
-          const productRef = doc(db, "products", item.productId);
-          const productSnap = await getDoc(productRef);
+    const finalCartItems = await Promise.all(
+      cartItems.map(async (item: { productId: string; quantity: number }) => {
+        const productRef = doc(db, "products", item.productId);
+        const productSnap = await getDoc(productRef);
 
-          if (!productSnap.exists()) {
-            console.warn(`Product ${item.productId} not found, skipping...`);
-            return null;
-          }
-
-          const productData = productSnap.data();
-          const price = productData?.price || 0; // Ensure price exists
-          totalAmount += item.quantity * price;
-
-          return {
-            productId: item.productId,
-            quantity: item.quantity,
-            price, // Add price to the order
-          };
+        if (!productSnap.exists()) {
+          console.warn(`Product ${item.productId} not found, skipping...`);
+          return null;
         }
-      )
+
+        const productData = productSnap.data();
+        const price = productData?.pricing?.[0]?.price || 0; 
+
+        totalAmount += item.quantity * price;
+
+        return {
+          productId: item.productId,
+          quantity: item.quantity,
+          price,
+        };
+      })
     );
 
-    // Remove null values from the updated cart (if any products were missing)
-    const finalCartItems = updatedCartItems.filter(
-      (item) => item !== null
-    ) as { productId: string; quantity: number; price: number }[];
+    // ✅ Remove Null Items (if any product was missing)
+    const filteredCartItems = finalCartItems.filter(Boolean);
 
-    if (finalCartItems.length === 0) {
-      return NextResponse.json(
-        { success: false, error: "No valid products found in cart" },
-        { status: 400 }
-      );
+    if (filteredCartItems.length === 0) {
+      return NextResponse.json({ success: false, error: "No valid products found in cart" }, { status: 400 });
     }
 
-    // Create new order
+    // ✅ Create New Order in Firestore (Before Shiprocket API Call)
     const newOrder = {
       userId,
-      items: finalCartItems,
+      items: filteredCartItems,
       totalAmount,
       status: "pending",
       createdAt: new Date().toISOString(),
+      shiprocketTrackingId: "Fetching...",  // Temporary tracking ID
     };
 
-    // Add order to Firestore
-    const docRef = await addDoc(collection(db, "orders"), newOrder);
+    const orderDocRef = await addDoc(collection(db, "orders"), newOrder);
+    const orderId = orderDocRef.id;
+
+    // ✅ Call Shiprocket API to Get Tracking ID
+    let trackingId: string | null = null;
+    if (SHIPROCKET_TOKEN) {
+      try {
+        const shiprocketResponse = await axios.post(
+          "https://apiv2.shiprocket.in/v1/external/orders/create/adhoc",
+          {
+            order_id: orderId,
+            order_date: new Date().toISOString(),
+            pickup_location: "Primary", // Modify as per your Shiprocket settings
+            billing_customer_name: shippingDetails.name,
+            billing_address: shippingDetails.line1,
+            billing_address_2: shippingDetails.line2 || "",
+            billing_city: shippingDetails.city,
+            billing_pincode: shippingDetails.zip,
+            billing_state: shippingDetails.state,
+            billing_country: "India",
+            billing_phone: shippingDetails.phone,
+            order_items: filteredCartItems.map((item) => ({
+              name: item.productId,
+              sku: item.productId,
+              units: item.quantity,
+              selling_price: item.price,
+            })),
+          },
+          { headers: { Authorization: `Bearer ${SHIPROCKET_TOKEN}` } }
+        );
+
+        const shiprocketOrderId = shiprocketResponse.data?.order_id || null;
+        trackingId = await getTrackingId(shiprocketOrderId);
+
+        // ✅ Update Firestore Order with Tracking ID
+        
+        console.log(shiprocketOrderId)
+        await updateDoc(orderDocRef, { shiprocketTrackingId: shipment_id || "Not Available" });
+      } catch (error) {
+        console.error("Shiprocket API error:", error);
+      }
+    }
 
     return NextResponse.json(
-      { success: true, data: { id: docRef.id, ...newOrder } },
+      { success: true, data: { id: orderId, ...newOrder, shiprocketTrackingId: trackingId } },
       { status: 201 }
     );
   } catch (error) {
     console.error("Error creating order:", error);
-    return NextResponse.json(
-      { success: false, error: "Error creating order" },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: false, error: "Error creating order" }, { status: 500 });
   }
 }
 
+// ✅ Fetch Order Details
 export async function GET(req: NextRequest) {
   try {
     const url = new URL(req.url);
@@ -115,65 +160,37 @@ export async function GET(req: NextRequest) {
     const orderId = url.searchParams.get("orderId");
 
     if (orderId) {
+      // ✅ Fetch a Single Order
       const orderRef = doc(db, "orders", orderId);
       const orderSnap = await getDoc(orderRef);
 
       if (!orderSnap.exists()) {
-        return NextResponse.json(
-          { success: false, error: "Order not found" },
-          { status: 404 }
-        );
+        return NextResponse.json({ success: false, error: "Order not found" }, { status: 404 });
       }
 
-      const orderData = {
-        id: orderSnap.id,
-        ...orderSnap.data(),
-      } as Order;
-
       return NextResponse.json(
-        {
-          success: true,
-          data: orderData,
-          msg: "Successfully fetched order",
-        },
+        { success: true, data: { id: orderSnap.id, ...orderSnap.data() }, msg: "Order fetched successfully" },
         { status: 200 }
       );
     } else if (userId) {
-      const orderRef = collection(db, "orders");
-      const orderQuery = query(orderRef, where("userId", "==", userId));
+      // ✅ Fetch All Orders of a User
+      const ordersQuery = query(collection(db, "orders"), where("userId", "==", userId));
+      const ordersSnap = await getDocs(ordersQuery);
 
-      const orderSnap = await getDocs(orderQuery);
-
-      const orders: Order[] = [];
-      orderSnap.forEach((doc) => {
-        orders.push({
-          id: doc.id,
-          ...doc.data(),
-        } as Order);
-      });
+      const orders: Order[] = ordersSnap.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      })) as Order[];
 
       return NextResponse.json(
-        {
-          success: true,
-          data: orders,
-          msg: `Fetched all orders of the user ${userId} successfully!`,
-        },
+        { success: true, data: orders, msg: `Fetched all orders of user ${userId}` },
         { status: 200 }
       );
     } else {
-      return NextResponse.json(
-        { success: false, error: "User ID or Order ID is required" },
-        { status: 400 }
-      );
+      return NextResponse.json({ success: false, error: "User ID or Order ID is required" }, { status: 400 });
     }
-  } catch (e) {
-    console.error("Error fetching user order:", e);
-    return NextResponse.json(
-      {
-        success: false,
-        msg: "Error occurred while fetching user order " + e,
-      },
-      { status: 500 }
-    );
+  } catch (error) {
+    console.error("Error fetching orders:", error);
+    return NextResponse.json({ success: false, msg: "Error fetching orders", error }, { status: 500 });
   }
 }
