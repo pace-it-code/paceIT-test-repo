@@ -134,9 +134,7 @@ export async function POST(req: NextRequest) {
         trackingId = await getTrackingId(shiprocketOrderId);
 
         // ✅ Update Firestore Order with Tracking ID
-        
-        console.log(shiprocketOrderId)
-        await updateDoc(orderDocRef, { shiprocketTrackingId: shipment_id || "Not Available" });
+        await updateDoc(orderDocRef, { shiprocketTrackingId: trackingId || "Not Available" });
       } catch (error) {
         console.error("Shiprocket API error:", error);
       }
