@@ -8,37 +8,34 @@ import {
   where,
   query,
   getDocs,
-  updateDoc,
 } from "firebase/firestore";
-import axios from "axios"; 
 import { Order } from "../../../../types/types";
-import { CodeSquare } from "lucide-react";
 import { cookies } from "next/headers";
 
-const SHIPROCKET_TOKEN = process.env.SHIPROCKET_API_TOKEN;
+
 
 // ✅ Fetch Shiprocket Tracking ID
-async function getTrackingId(orderId: string) {
-    try {
-        const response = await axios.get(
-            `https://apiv2.shiprocket.in/v1/external/orders/show/${orderId}`,
-            {
-                headers: { Authorization: `Bearer ${SHIPROCKET_TOKEN}` },
-            }
-        );
+// async function getTrackingId(orderId: string) {
+//     try {
+//         const response = await axios.get(
+//             `https://apiv2.shiprocket.in/v1/external/orders/show/${orderId}`,
+//             {
+//                 headers: { Authorization: `Bearer ${SHIPROCKET_TOKEN}` },
+//             }
+//         );
 
-        return response.data?.shipment?.[0]?.awb_code || null;
-    } catch (error) {
-        console.error("Error fetching Shiprocket tracking ID:", error);
-        return null;
-    }
-}
+//         return response.data?.shipment?.[0]?.awb_code || null;
+//     } catch (error) {
+//         console.error("Error fetching Shiprocket tracking ID:", error);
+//         return null;
+//     }
+// }
 
 // ✅ Create Order & Store Tracking ID in Firestore
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { userId, shippingDetails } = body; 
+    const { userId } = body; 
 
     if (!userId) {
       return NextResponse.json({ success: false, error: "User ID is required" }, { status: 400 });

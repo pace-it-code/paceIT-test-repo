@@ -1,5 +1,5 @@
 import { db } from "../../../../utils/firebase";
-import { doc, or, updateDoc } from "firebase/firestore";
+import { doc, updateDoc } from "firebase/firestore";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import Razorpay from "razorpay";
