@@ -12,6 +12,8 @@ import {
 } from "firebase/firestore";
 import axios from "axios"; 
 import { Order } from "../../../../types/types";
+import { CodeSquare } from "lucide-react";
+import { cookies } from "next/headers";
 
 const SHIPROCKET_TOKEN = process.env.SHIPROCKET_API_TOKEN;
 
@@ -103,45 +105,45 @@ export async function POST(req: NextRequest) {
     const orderId = orderDocRef.id;
 
     // ✅ Call Shiprocket API to Get Tracking ID
-    let trackingId: string | null = null;
-    if (SHIPROCKET_TOKEN) {
-      try {
-        const shiprocketResponse = await axios.post(
-          "https://apiv2.shiprocket.in/v1/external/orders/create/adhoc",
-          {
-            order_id: orderId,
-            order_date: new Date().toISOString(),
-            pickup_location: "Primary", // Modify as per your Shiprocket settings
-            billing_customer_name: shippingDetails.name,
-            billing_address: shippingDetails.line1,
-            billing_address_2: shippingDetails.line2 || "",
-            billing_city: shippingDetails.city,
-            billing_pincode: shippingDetails.zip,
-            billing_state: shippingDetails.state,
-            billing_country: "India",
-            billing_phone: shippingDetails.phone,
-            order_items: filteredCartItems.map((item) => ({
-              name: item.productId,
-              sku: item.productId,
-              units: item.quantity,
-              selling_price: item.price,
-            })),
-          },
-          { headers: { Authorization: `Bearer ${SHIPROCKET_TOKEN}` } }
-        );
+    // let trackingId: string | null = null;
+    // if (SHIPROCKET_TOKEN) {
+    //   try {
+    //     const shiprocketResponse = await axios.post(
+    //       "https://apiv2.shiprocket.in/v1/external/orders/create/adhoc",
+    //       {
+    //         order_id: orderId,
+    //         order_date: new Date().toISOString(),
+    //         pickup_location: "Primary", // Modify as per your Shiprocket settings
+    //         billing_customer_name: shippingDetails.name,
+    //         billing_address: shippingDetails.line1,
+    //         billing_address_2: shippingDetails.line2 || "",
+    //         billing_city: shippingDetails.city,
+    //         billing_pincode: shippingDetails.zip,
+    //         billing_state: shippingDetails.state,
+    //         billing_country: "India",
+    //         billing_phone: shippingDetails.phone,
+    //         order_items: filteredCartItems.map((item) => ({
+    //           name: item.productId,
+    //           sku: item.productId,
+    //           units: item.quantity,
+    //           selling_price: item.price,
+    //         })),
+    //       },
+    //       { headers: { Authorization: `Bearer ${SHIPROCKET_TOKEN}` } }
+    //     );
 
-        const shiprocketOrderId = shiprocketResponse.data?.order_id || null;
-        trackingId = await getTrackingId(shiprocketOrderId);
+    //     const shiprocketOrderId = shiprocketResponse.data?.order_id || null;
+    //     trackingId = await getTrackingId(shiprocketOrderId);
 
-        // ✅ Update Firestore Order with Tracking ID
-        await updateDoc(orderDocRef, { shiprocketTrackingId: trackingId || "Not Available" });
-      } catch (error) {
-        console.error("Shiprocket API error:", error);
-      }
-    }
-
+    //     // ✅ Update Firestore Order with Tracking ID
+    //     await updateDoc(orderDocRef, { shiprocketTrackingId: trackingId || "Not Available" });
+    //   } catch (error) {
+    //     console.error("Shiprocket API error:", error);
+    //   }
+    // }
+    (await cookies()).set('orderId',orderId,{httpOnly:true,maxAge:1000})
     return NextResponse.json(
-      { success: true, data: { id: orderId, ...newOrder, shiprocketTrackingId: trackingId } },
+      { success: true, data: { id: orderId, ...newOrder },msg:"Order Id saved in cookies" },
       { status: 201 }
     );
   } catch (error) {

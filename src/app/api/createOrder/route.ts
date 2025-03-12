@@ -1,3 +1,6 @@
+import { db } from "../../../../utils/firebase";
+import { doc, or, updateDoc } from "firebase/firestore";
+import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import Razorpay from "razorpay";
 
@@ -17,7 +20,9 @@ export async function POST(req: Request) {
       amount,
       currency: "INR",
     });
-
+    const orderId = String((await cookies()).get('orderId')?.value);
+    const orderRef = doc(db,"orders",orderId);
+    await updateDoc(orderRef,{status:"Completed !"})
     return NextResponse.json(order);
   } catch (error) {
     console.error("Error creating order:", error);
