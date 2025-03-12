@@ -22,7 +22,7 @@ export async function POST(req: Request) {
     });
     const orderId = String((await cookies()).get('orderId')?.value);
     const orderRef = doc(db,"orders",orderId);
-    await updateDoc(orderRef,{status:"Completed !"})
+    await updateDoc(orderRef,{status:"Payment Completed Ready to Ship"});
     return NextResponse.json(order);
   } catch (error) {
     console.error("Error creating order:", error);

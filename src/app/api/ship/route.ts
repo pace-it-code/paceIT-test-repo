@@ -65,7 +65,7 @@ export async function POST(request: Request) {
         const cartItems = userData?.cart || [];
         const orderId =String((await cookies()).get('orderId')?.value);
 
-        const orderRef = doc(db,"order",orderId);
+        const orderRef = doc(db,"orders",orderId);
 
 
         console.log("Fetched Address:", address);
