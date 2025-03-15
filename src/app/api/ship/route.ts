@@ -3,6 +3,8 @@ import { db } from "../../../../utils/firebase";
 import { doc, getDoc,updateDoc } from "firebase/firestore";
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
+import { User } from "../../../../types/types";
+
 
 const SHIPROCKET_API_BASE = "https://apiv2.shiprocket.in/v1/external";
 
@@ -27,6 +29,7 @@ interface Address {
 interface UserData {
     address?: Address; // ✅ Now storing only one address (not an array)
     cart?: CartItem[];
+    email:string
 }
 
 // ✅ POST method to handle Shiprocket order creation
@@ -133,7 +136,7 @@ export async function POST(request: Request) {
             billing_pincode: parseInt(address.zip, 10),
             billing_state: address.state,
             billing_country: address.country || "India",
-            billing_email: "customer@example.com",
+            billing_email: userData.email,
             billing_phone: parseInt(address.phone, 10),
             shipping_is_billing: true,
             order_items: orderItems,

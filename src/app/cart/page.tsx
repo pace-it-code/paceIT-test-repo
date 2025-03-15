@@ -85,19 +85,23 @@ export default function CartPage() {
     setCart(prevCart =>
       prevCart.map(item =>
         item.productId === productId
-          ? { ...item, quantity: item.quantity + change }
+          ? { ...item, quantity: Math.max(1, item.quantity + change) } // Ensure quantity stays at least 1
           : item
       )
     );
+  
     const updatedCart = latestCartRef.current.map(item =>
       item.productId === productId
-        ? { ...item, quantity: item.quantity + change }
+        ? { ...item, quantity: Math.max(1, item.quantity + change) } // Ensure quantity stays at least 1
         : item
     );
+  
     latestCartRef.current = updatedCart;
     quantityChanges.current[productId] =
-      updatedCart.find(it => it.productId === productId)?.quantity || 0;
+      updatedCart.find(it => it.productId === productId)?.quantity || 1;
   };
+  
+  
 
   // Remove an item from the cart
   const removeCartItem = async (productId: string, packageSize: string) => {
