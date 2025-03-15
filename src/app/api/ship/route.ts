@@ -1,7 +1,10 @@
 import axios from "axios";
 import { db } from "../../../../utils/firebase";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc,updateDoc } from "firebase/firestore";
 import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
+import { User } from "../../../../types/types";
+
 
 const SHIPROCKET_API_BASE = "https://apiv2.shiprocket.in/v1/external";
 
@@ -26,6 +29,7 @@ interface Address {
 interface UserData {
     address?: Address; // ✅ Now storing only one address (not an array)
     cart?: CartItem[];
+    email:string
 }
 
 // ✅ POST method to handle Shiprocket order creation
@@ -62,10 +66,15 @@ export async function POST(request: Request) {
         const userData = userSnap.data() as UserData;
         const address = userData?.address || null; // ✅ Now fetching as a single object
         const cartItems = userData?.cart || [];
+        const orderId =String((await cookies()).get('orderId')?.value);
+
+        const orderRef = doc(db,"orders",orderId);
+
 
         console.log("Fetched Address:", address);
         console.log("Fetched Cart Items:", cartItems);
         console.log("Payment Method:", paymentMethod);
+        console.log("Fetching OrderId",orderId)
 
         if (!address) {
             console.error("No valid address found for the user.");
@@ -81,6 +90,12 @@ export async function POST(request: Request) {
                 { success: false, error: "Cart is empty." },
                 { status: 400 }
             );
+        }
+        if(!orderId){
+            console.log("Error while getting orderId form cookies");
+            return NextResponse.json({
+                success:false, error:"Order Id error while fetching from cookies !"
+            },{status:404})
         }
 
         const token = process.env.SHIPROCKET_API_TOKEN;
@@ -110,7 +125,7 @@ export async function POST(request: Request) {
         const shiprocketPaymentMethod = paymentMethod === "COD" ? "COD" : "Prepaid";
         
         const orderData = {
-            order_id: `ORDER_${userId}_${Date.now()}`,
+            order_id: orderId,
             order_date: new Date().toISOString().slice(0, 10),
             pickup_location: "home",
             billing_customer_name: address.name,
@@ -121,7 +136,7 @@ export async function POST(request: Request) {
             billing_pincode: parseInt(address.zip, 10),
             billing_state: address.state,
             billing_country: address.country || "India",
-            billing_email: "customer@example.com",
+            billing_email: userData.email,
             billing_phone: parseInt(address.phone, 10),
             shipping_is_billing: true,
             order_items: orderItems,
@@ -150,9 +165,9 @@ export async function POST(request: Request) {
                 },
             }
         );
-
+        
         console.log("Shiprocket API Response:", response.data);
-
+        await updateDoc(orderRef, { shiprocketTrackingId: response.data.order_id || "Not Available" });
         return NextResponse.json({ success: true, data: response.data });
     } catch (error: unknown) {
         console.error("Shiprocket Order Error:", error);
