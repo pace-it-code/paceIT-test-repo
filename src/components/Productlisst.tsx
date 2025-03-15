@@ -108,14 +108,20 @@ const ProductList: React.FC<ProductListProps> = ({ products, onBack, isLoading }
                 
                 {/* Dosage information */}
                 <div className="mb-3">
-                  <p className="text-xs text-gray-600">
-                    <span className="font-medium">Dosage:</span> {product.dosage.method}
-                  </p>
-                  <p className="text-xs text-gray-600">
-                    <span className="font-medium">Amount:</span> {product.dosage.dosage.dose} per {product.dosage.dosage.acre}
-                  </p>
-                </div>
-                
+  <p className="text-xs text-gray-600">
+    <span className="font-medium">Dosage:</span> {product.dosage.method}
+  </p>
+  {product.dosage?.dosage && product.dosage.dosage.length > 0 ? (
+    product.dosage.dosage.map((item, idx) => (
+      <p key={idx} className="text-xs text-gray-600">
+        <span className="font-medium">Amount {idx + 1}:</span> {item.dose} per {item.arce}
+      </p>
+    ))
+  ) : (
+    <p className="text-xs text-gray-600">No dosage data</p>
+  )}
+</div>
+
                 <div className="flex justify-between items-center">
                   <div>
                     {product.discount ? (
