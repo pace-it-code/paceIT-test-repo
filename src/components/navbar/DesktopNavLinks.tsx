@@ -8,6 +8,7 @@ export default function DesktopNavLinks() {
       <Link href="/product" className="hover:text-white hover:underline underline-offset-4 transition-colors">Products</Link>
       <Link href="/about" className="hover:text-white hover:underline underline-offset-4 transition-colors">About</Link>
       <Link href="/contact" className="hover:text-white hover:underline underline-offset-4 transition-colors">Contact</Link>
+      <Link href="/warehouse" className="hover:text-white hover:underline underline-offset-4 transition-colors">Warehouse</Link>
     </div>
   );
 }
