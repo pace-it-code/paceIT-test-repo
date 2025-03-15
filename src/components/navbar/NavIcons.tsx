@@ -157,9 +157,7 @@ export default function NavIcons() {
         {isProfileOpen && (
           <div className="absolute right-0 top-full mt-2 bg-white shadow-lg rounded-md w-48 overflow-hidden z-50 border border-gray-100">
             <ul className="py-1">
-              <li className="hover:bg-gray-50 transition-colors">
-                <Link href="/profile" className="block px-4 py-2 text-gray-800">Profile</Link>
-              </li>
+              
               <li className="hover:bg-gray-50 transition-colors">
                 <Link href="/orders" className="block px-4 py-2 text-gray-800">Orders</Link>
               </li><li className="hover:bg-gray-50 transition-colors">
