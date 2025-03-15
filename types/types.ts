@@ -25,8 +25,11 @@
       search?:string;
       keywords?:string[];  // Crops to avoid usage (e.g., ['wheat', 'hybrid seed'])
       dosage: {
-        method: string;           // Dosage method (e.g., 'Mix with water and rub on seeds')
-        dosage:{dose:string,acre:string}
+        method: string; // e.g., "mix Vitavax 3Grams..."
+        dosage: Array<{
+          arce: string; // e.g., "50 Kg Seed"
+          dose: string; // e.g., "100 gm"
+        }>;
       };
       benefits: string[];  
       discount?:number

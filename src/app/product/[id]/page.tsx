@@ -1,4 +1,5 @@
 "use client";
+import React from "react";
 
 import { useRouter, useParams } from "next/navigation";
 import { useProduct } from "../../hooks/useProduct";
@@ -29,6 +30,7 @@ export default function ProductDetail() {
         // Replace "/product" with your actual endpoint if different
         const res = await api.get<{ data: Product[] }>("/product");
         setHotDeals(res.data.data);
+        console.log("🔥 Hot Deals:", res.data.data);
       } catch (err: unknown) {
         console.error("Error fetching hot deals:", err);
         setDealError("Failed to load hot deals");
@@ -182,19 +184,34 @@ export default function ProductDetail() {
                   </td>
                 </tr>
                 {/* Dose */}
-                <tr className="border-b border-gray-200">
-                  <td className="py-2 px-3 text-gray-700">Dose</td>
-                  <td className="py-2 px-3 text-gray-700">
-                    {product.dosage?.dosage?.dose || "N/A"}
-                  </td>
-                </tr>
-                {/* Arce */}
-                <tr className="border-b border-gray-200">
-                  <td className="py-2 px-3 text-gray-700">Arce</td>
-                  <td className="py-2 px-3 text-gray-700">
-                    {product.dosage?.dosage?.acre || "N/A"}
-                  </td>
-                </tr>
+                
+                {(() => {
+  const dosageArray = product.dosage?.dosage;
+
+  // If there's no dosage data or it's empty, show a fallback row.
+  if (!dosageArray || dosageArray.length === 0) {
+    return (
+      <tr className="border-b border-gray-200">
+        <td className="py-2 px-3 text-gray-700" colSpan={2}>
+          No dosage data
+        </td>
+      </tr>
+    );
+  }
+
+  // Otherwise, map over the array of dosage items.
+  return dosageArray.map((item, idx) => [
+    <tr key={`dose-${idx}`} className="border-b border-gray-200">
+      <td className="py-2 px-3 text-gray-700">Dose (#{idx + 1})</td>
+      <td className="py-2 px-3 text-gray-700">{item.dose || "N/A"}</td>
+    </tr>,
+    <tr key={`arce-${idx}`} className="border-b border-gray-200">
+      <td className="py-2 px-3 text-gray-700">Arce (#{idx + 1})</td>
+      <td className="py-2 px-3 text-gray-700">{item.arce || "N/A"}</td>
+    </tr>
+  ]);
+})()}
+
                 {/* Pricing (all packages) */}
                 <tr>
                   <td className="py-2 px-3 text-gray-700">Pricing</td>

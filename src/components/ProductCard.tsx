@@ -3,9 +3,8 @@ import Image from "next/image";
 import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { Product } from "../../types/types";
-import api from "../app/utils/api"; // Import API utility
+import api from "../app/utils/api";
 import { useCoupon } from "@/app/context/CouponContext";
-
 
 export interface PricingOption {
   packageSize: string;
@@ -17,14 +16,12 @@ interface ExamProduct extends Product {
   discount?: number;
 }
 
-
 export default function ProductCard({ product }: { product: ExamProduct }) {
-  const router = useRouter()
+  const router = useRouter();
   const { coupon } = useCoupon();
   const [selectedPrice, setSelectedPrice] = useState<PricingOption | null>(null);
   const [isHovered, setIsHovered] = useState(false);
   const [userId, setUserId] = useState<string>('');
-  
 
   // Get product images
   const productImage = product.images?.[0]
@@ -66,15 +63,15 @@ export default function ProductCard({ product }: { product: ExamProduct }) {
 
   // Add item to cart
   const addToCart = async (e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent unwanted navigation
-    e.preventDefault(); // Prevent page reload
+    e.stopPropagation();
+    e.preventDefault();
 
     if (!userId) {
       alert(' Please log in.');
-      router.push("/auth")
-      
+      router.push("/auth");
       return;
     }
+    
     if (!selectedPrice) {
       alert('Please select a package size.');
       return;
@@ -84,7 +81,7 @@ export default function ProductCard({ product }: { product: ExamProduct }) {
       const response = await api.put('/cart', {
         userId,
         productId: product.id,
-        quantity: 1, // Always stores quantity as 1
+        quantity: 1,
         packageSize: selectedPrice.packageSize,
       });
 
@@ -99,20 +96,33 @@ export default function ProductCard({ product }: { product: ExamProduct }) {
     }
   };
 
-  
+  // Handle dropdown change
+  const handleDropdownChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    e.stopPropagation();
+    e.preventDefault();
+    
+    const selected = product.pricing?.find(
+      (p) => p.packageSize === e.target.value
+    );
+    
+    if (selected) {
+      setSelectedPrice(selected);
+    }
+  };
+
   return (
     <div 
       className="overflow-hidden bg-white border border-gray-100 rounded-lg shadow-sm transition-all duration-200 hover:shadow-md"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <Link href={`/product/${product.id}`} className="block">
-        <div className="relative">
-          {appliedDiscount > 0 && (
-            <div className="absolute top-3 right-3 bg-red-500 text-white text-xs px-2 py-1 rounded-full z-10">
-              {appliedDiscount}% OFF
-            </div>
-          )}
+      <div className="relative">
+        {appliedDiscount > 0 && (
+          <div className="absolute top-3 right-3 bg-red-500 text-white text-xs px-2 py-1 rounded-full z-10">
+            {appliedDiscount}% OFF
+          </div>
+        )}
+        <Link href={`/product/${product.id}`} className="block">
           <div className="mt-7 w-full h-52 relative overflow-hidden">
             <Image
               src={productImage}
@@ -122,26 +132,24 @@ export default function ProductCard({ product }: { product: ExamProduct }) {
               priority
             />
           </div>
-        </div>
-        
-        <div className="p-4">
+        </Link>
+      </div>
+      
+      <div className="p-4">
+        <Link href={`/product/${product.id}`} className="block">
           <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">{product.category}</p>
           <h2 className="text-lg font-medium text-gray-800 mb-3">{product.name}</h2>
-          
-          {/* Package Size Selector */}
+        </Link>
+        
+        {/* Package Size Selector - Removed from Link */}
+        <div onClick={(e) => e.stopPropagation()}>
           <select
             id="pricing"
             name="pricing"
             className="w-full py-2 px-3 border border-gray-200 rounded text-sm bg-gray-50 focus:outline-none focus:ring-1 focus:ring-gray-400 transition-colors"
             value={selectedPrice?.packageSize || ""}
-            onChange={(e) => {
-              const selected = product.pricing?.find(
-                (p) => p.packageSize === e.target.value
-              );
-              if (selected) {
-                setSelectedPrice(selected);
-              }
-            }}
+            onChange={handleDropdownChange}
+            onClick={(e) => e.stopPropagation()}
           >
             {product.pricing?.map((option, index) => (
               <option key={index} value={option.packageSize}>
@@ -149,34 +157,33 @@ export default function ProductCard({ product }: { product: ExamProduct }) {
               </option>
             ))}
           </select>
+        </div>
 
-          {selectedPrice && (
-            <div className="mt-3 flex items-end justify-between">
+        {selectedPrice && (
+          <div className="mt-3 flex items-end justify-between">
+            <Link href={`/product/${product.id}`} className="block">
               <div>
                 {appliedDiscount > 0 && (
                   <span className="block text-gray-500 line-through text-xs">₹{originalPrice}</span>
                 )}
                 <span className="text-lg font-semibold text-gray-900">₹{discountedPrice}</span>
               </div>
+            </Link>
 
-              {/* Quantity Selector */}
-             
-
-              {/* Add to Cart Button */}
-            {/* ✅ Add to Cart Button (Quantity is always 1) */}
-<button 
-  className={`text-white text-sm px-4 py-2 rounded-md transition-all duration-300 ${
-    isHovered ? 'bg-emerald-600' : 'bg-emerald-500'
-  }`}
-  onClick={addToCart} // ✅ Calls function to add with quantity = 1
->
-  Add to Cart 🛒
-</button>
-
+            {/* Add to Cart Button - Removed from Link */}
+            <div onClick={(e) => e.stopPropagation()}>
+              <button 
+                className={`text-white text-sm px-4 py-2 rounded-md transition-all duration-300 ${
+                  isHovered ? 'bg-emerald-600' : 'bg-emerald-500'
+                }`}
+                onClick={addToCart}
+              >
+                Add to Cart 🛒
+              </button>
             </div>
-          )}
-        </div>
-      </Link>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

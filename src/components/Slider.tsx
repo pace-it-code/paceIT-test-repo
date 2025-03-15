@@ -71,9 +71,9 @@ export default function HeroSlider() {
   };
 
   return (
-    <div className="mt-[40px] mb-12 mx-12">
+    <div className="mt-[40px] mb-12 mx-4 md:mx-12">
       {slides.length > 0 && (
-        <section className="relative w-full h-[80vh] overflow-hidden rounded-2xl shadow-2xl">
+        <section className="relative w-full h-[40vh] md:h-[80vh] overflow-hidden rounded-2xl shadow-2xl">
           {slides.map((slide, index) => (
             <div
               key={slide.id}
@@ -83,7 +83,6 @@ export default function HeroSlider() {
             >
               <Link href={slide.link} className="absolute inset-0 w-full h-full">
                 <div className="relative w-full h-full">
-                  {/* ✅ Using next/image for better optimization */}
                   <Image
                     src={slide.imageUrl}
                     alt={slide.title}
@@ -93,11 +92,12 @@ export default function HeroSlider() {
                     className="absolute inset-0"
                   />
                   <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
-                    <div className="text-white text-center space-y-6 px-6">
-                      <h2 className="text-4xl md:text-6xl font-bold tracking-tight">{slide.title}</h2>
-                      <p className="text-lg md:text-xl text-gray-100 max-w-md leading-relaxed">{slide.description}</p>
-                      {/* ✅ Removed the extra <a> tag to prevent hydration error */}
-                      <button className="mt-4 px-8 py-3 bg-white text-gray-900 font-medium rounded-full hover:bg-opacity-90 transition-all inline-flex items-center gap-2 hover:shadow-lg transform hover:-translate-y-1">
+                    <div className="text-white text-center space-y-3 md:space-y-6 px-4 md:px-6">
+                      <h2 className="text-2xl md:text-4xl lg:text-6xl font-bold tracking-tight">{slide.title}</h2>
+                      <p className="text-sm md:text-lg lg:text-xl text-gray-100 max-w-md leading-relaxed line-clamp-2 md:line-clamp-none">
+                        {slide.description}
+                      </p>
+                      <button className="mt-2 md:mt-4 px-4 md:px-8 py-2 md:py-3 bg-white text-gray-900 text-sm md:text-base font-medium rounded-full hover:bg-opacity-90 transition-all inline-flex items-center gap-2 hover:shadow-lg transform hover:-translate-y-1">
                         Explore More
                       </button>
                     </div>
@@ -107,29 +107,29 @@ export default function HeroSlider() {
             </div>
           ))}
 
-          {/* Navigation Arrows */}
+          {/* Navigation Arrows - Hidden on small screens */}
           <button
             onClick={prevSlide}
-            className="absolute left-4 top-1/2 -translate-y-1/2 z-20 bg-white bg-opacity-20 backdrop-blur-sm hover:bg-opacity-30 text-white p-3 rounded-full shadow-lg transform transition-transform hover:scale-110"
+            className="hidden md:block absolute left-4 top-1/2 -translate-y-1/2 z-20 bg-white bg-opacity-20 backdrop-blur-sm hover:bg-opacity-30 text-white p-2 md:p-3 rounded-full shadow-lg transform transition-transform hover:scale-110"
           >
-            <ChevronLeft className="w-6 h-6" />
+            <ChevronLeft className="w-4 h-4 md:w-6 md:h-6" />
           </button>
 
           <button
             onClick={nextSlide}
-            className="absolute right-4 top-1/2 -translate-y-1/2 z-20 bg-white bg-opacity-20 backdrop-blur-sm hover:bg-opacity-30 text-white p-3 rounded-full shadow-lg transform transition-transform hover:scale-110"
+            className="hidden md:block absolute right-4 top-1/2 -translate-y-1/2 z-20 bg-white bg-opacity-20 backdrop-blur-sm hover:bg-opacity-30 text-white p-2 md:p-3 rounded-full shadow-lg transform transition-transform hover:scale-110"
           >
-            <ChevronRight className="w-6 h-6" />
+            <ChevronRight className="w-4 h-4 md:w-6 md:h-6" />
           </button>
 
-          {/* Dots Navigation */}
-          <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex space-x-3">
+          {/* Dots Navigation - Smaller on mobile */}
+          <div className="absolute bottom-4 md:bottom-8 left-1/2 -translate-x-1/2 z-20 flex space-x-2 md:space-x-3">
             {slides.map((_, index) => (
               <button
                 key={index}
                 onClick={() => goToSlide(index)}
-                className={`w-3 h-3 rounded-full transition-all ${
-                  currentIndex === index ? "bg-white w-8" : "bg-white bg-opacity-50 hover:bg-opacity-75"
+                className={`h-2 md:h-3 rounded-full transition-all ${
+                  currentIndex === index ? "bg-white w-6 md:w-8" : "bg-white w-2 md:w-3 bg-opacity-50 hover:bg-opacity-75"
                 }`}
                 aria-label={`Go to slide ${index + 1}`}
               />
