@@ -18,7 +18,7 @@ export default function OrderDetailsPage() {
 
   useEffect(() => {
     fetchOrderDetails();
-  }, []);
+  });
 
   const fetchOrderDetails = async () => {
     try {

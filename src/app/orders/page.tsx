@@ -49,6 +49,7 @@ export default function OrdersPage() {
       setLoading(false);
     }
   };
+  const sortedOrders = orders.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-6">
@@ -62,7 +63,7 @@ export default function OrdersPage() {
         <p className="text-center text-gray-600">No orders found.</p>
       ) : (
         <div className="max-w-3xl mx-auto space-y-6">
-          {orders.map((order) => (
+          {sortedOrders.map((order) => (
             <div key={order.id} className="bg-white shadow-md rounded-lg p-6">
               <h2 className="text-xl font-semibold text-gray-800 mb-2">Order ID: {order.id}</h2>
               <p className="text-gray-600">Total Amount: <span className="font-bold">₹{order.totalAmount}</span></p>
