@@ -13,6 +13,7 @@ interface Slide {
   imageUrl: string;
   link: string;
   bgColor: string;
+  buttonText: string; // New field
 }
 
 export default function HeroSlider() {
@@ -26,6 +27,7 @@ export default function HeroSlider() {
       try {
         const response = await axios.get("/api/sliders");
         setSlides(response.data);
+        console.log(response.data);
       } catch (error) {
         console.error("Error fetching slides:", error);
       }
@@ -98,7 +100,7 @@ export default function HeroSlider() {
                         {slide.description}
                       </p>
                       <button className="mt-2 md:mt-4 px-4 md:px-8 py-2 md:py-3 bg-white text-gray-900 text-sm md:text-base font-medium rounded-full hover:bg-opacity-90 transition-all inline-flex items-center gap-2 hover:shadow-lg transform hover:-translate-y-1">
-                        Explore More
+                      {slide.buttonText || "Explore more" }
                       </button>
                     </div>
                   </div>
